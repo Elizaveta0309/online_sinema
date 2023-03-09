@@ -1,7 +1,7 @@
 import os
 from logging import config as logging_config
 
-from core.logger import LOGGING
+from src.core.logger import LOGGING
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
