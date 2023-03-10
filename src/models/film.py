@@ -40,7 +40,7 @@ class Film(BaseModel, ConfigMixin):
     description: Union[str, None] = Field(title='Описание', example='Very good film!')
     creation_date: datetime = Field(title='Дата создания', example='1990-01-01')
     rating: float = Field(title='Рейтинг', example=9.4)
-    age_limit: int = Field(title='Возрастной ценз', example=18, gt=0)
+    age_limit: int = Field(title='Возрастной ценз', example=18, gt=0, default=0)
     genres: List[Dict] = Field(title='Жанры', example=[
         {"name": "Comedy", "id": "6f822a92"},
         {"name": "Adventure", "id": "00f74939"}
