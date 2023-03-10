@@ -4,13 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from src.services.film import FilmService, get_film_service
+from src.models.film import Film
 
 router = APIRouter()
-
-
-class Film(BaseModel):
-    id: str
-    title: str
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
