@@ -30,7 +30,7 @@ SETTINGS = {
 MAPPINGS = {
     "dynamic": "strict",
     "properties": {
-        "id": {"type": "keyword"},
+        "uuid": {"type": "keyword"},
         "name": {
             "type": "text",
             "analyzer": "ru_en",

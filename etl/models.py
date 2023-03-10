@@ -9,23 +9,24 @@ LIST_FIELDS = [
     'writers',
     'actors_names',
     'writers_names',
-    'director',
+    "directors_names",
+    'directors',
     'genre'
 ]
 
 NULLABLES = [
     'description',
+    'age_limit'
 ]
 
 
 class PersonModel(BaseModel):
     """Модель представления персоны."""
-    id: UUID
+    uuid: UUID
     full_name: str
-    roles: Optional[List]
     film_ids: Optional[List]
 
-    @validator("roles", "film_ids")
+    @validator("film_ids")
     def valid_list_field(cls, value):
         if value is None:
             return []
@@ -34,22 +35,24 @@ class PersonModel(BaseModel):
 
 class GenreModel(BaseModel):
     """Модель представления жанра."""
-    id: UUID
+    uuid: UUID
     name: str
 
 
 class FilmworkModel(BaseModel):
     """Модель представления кинопроизведения."""
-    id: UUID
+    uuid: UUID
     imdb_rating: Optional[float]
     genre: Optional[List]
     title: str
     description: Optional[str]
-    director: Optional[List]
+    directors: Optional[List]
     actors_names: Optional[List]
     writers_names: Optional[List]
+    directors_names: Optional[List]
     actors: Optional[List]
     writers: Optional[List]
+    age_limit: Optional[int]
 
     @validator(*NULLABLES)
     def valid_description(cls, value):

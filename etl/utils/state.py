@@ -1,7 +1,6 @@
 import abc
 from datetime import datetime
-import json
-from typing import Any, Optional
+from typing import Any
 
 import redis
 
@@ -38,57 +37,6 @@ class BaseStorage:
     def remove(self, list_name: str, id: str) -> None:
         """Удалить значение из списка"""
         pass
-
-
-class JsonFileStorage(BaseStorage):
-    def __init__(self, file_path: Optional[str] = None):
-        self.file_path = file_path
-
-    def save_state(self, state: dict) -> None:
-        """Сохранить состояние в постоянное хранилище"""
-        contents = self.retrieve_state()
-        contents.update(state)
-
-        try:
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump(contents, f)
-        except FileNotFoundError:
-            pass
-
-    def retrieve_state(self) -> dict:
-        """Загрузить состояние локально из постоянного хранилища"""
-        if self.file_path is None:
-            return {}
-        try:
-            with open(self.file_path, 'r') as file:
-                contents = json.load(file)
-            return contents
-        except json.decoder.JSONDecodeError:
-            return {}
-
-    def add_to_list(self, list_name: str, value) -> None:
-        contents = self.retrieve_state()
-
-        try:
-            contents[list_name].append(value)
-        except KeyError:
-            contents[list_name] = [value]
-
-        try:
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump(contents, f)
-        except FileNotFoundError:
-            pass
-
-    def clear_list(self, list_name: str) -> None:
-        contents = self.retrieve_state()
-        contents[list_name] = []
-
-        try:
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump(contents, f)
-        except FileNotFoundError:
-            pass
 
 
 # Вопрос: нужно ли использовать backoff и для подключения к Redis?

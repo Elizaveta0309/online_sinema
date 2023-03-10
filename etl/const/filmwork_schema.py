@@ -42,14 +42,24 @@ SETTINGS = {
 MAPPINGS = {
     "dynamic": "strict",
     "properties": {
-      "id": {
+      "uuid": {
         "type": "keyword"
       },
       "imdb_rating": {
         "type": "float"
       },
       "genre": {
-        "type": "keyword"
+        "type": "nested",
+        "dynamic": "strict",
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text",
+            "analyzer": "ru_en"
+          }
+        }
       },
       "title": {
         "type": "text",
@@ -64,11 +74,24 @@ MAPPINGS = {
         "type": "text",
         "analyzer": "ru_en"
       },
-      "director": {
+      "directors": {
+        "type": "nested",
+        "dynamic": "strict",
+        "properties": {
+          "uuid": {
+            "type": "keyword"
+          },
+          "full_name": {
+            "type": "text",
+            "analyzer": "ru_en"
+          }
+        }
+      },
+      "actors_names": {
         "type": "text",
         "analyzer": "ru_en"
       },
-      "actors_names": {
+      "directors_names": {
         "type": "text",
         "analyzer": "ru_en"
       },
@@ -80,7 +103,7 @@ MAPPINGS = {
         "type": "nested",
         "dynamic": "strict",
         "properties": {
-          "id": {
+          "uuid": {
             "type": "keyword"
           },
           "full_name": {
@@ -93,7 +116,7 @@ MAPPINGS = {
         "type": "nested",
         "dynamic": "strict",
         "properties": {
-          "id": {
+          "uuid": {
             "type": "keyword"
           },
           "full_name": {
@@ -101,6 +124,9 @@ MAPPINGS = {
             "analyzer": "ru_en"
           }
         }
+      },
+      "age_limit": {
+        "type": "integer"
       }
     }
   }

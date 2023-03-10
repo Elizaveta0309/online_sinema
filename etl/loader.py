@@ -26,20 +26,7 @@ INDEX_SCHEMAS = {
 }
 
 
-class BaseLoader:
-    def __init__(
-            self,
-            state: ModifiedState,
-            logger: logging.Logger
-            ) -> None:
-        self.state = state
-        self.logger = logger
-
-    def load(self, data: dict):
-        pass
-
-
-class ElasticLoader(BaseLoader):
+class ElasticLoader:
     """Загружает данные в ES
 
     Attributes:
@@ -54,7 +41,8 @@ class ElasticLoader(BaseLoader):
             es_conn: Elasticsearch
             ) -> None:
         self.conn = es_conn
-        super().__init__(state, logger)
+        self.state = state
+        self.logger = logger
 
     def load(self, data: dict):
         """Выгружает батч в нужный индекс ES.
@@ -96,7 +84,7 @@ class ElasticLoader(BaseLoader):
                 json.dumps({
                     "index": {
                         "_index": index,
-                        "_id": str(row.id)
+                        "_id": str(row.uuid)
                     }
                 }),
                 row.json()

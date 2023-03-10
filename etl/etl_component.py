@@ -1,9 +1,9 @@
 from datetime import datetime
 import logging
 from typing import Optional
-from extractor import BaseExtractor
+from extractor import PostgresExtractor
 from transformer import Transformer
-from loader import BaseLoader
+from loader import ElasticLoader
 from utils.state import ModifiedState
 
 
@@ -19,9 +19,9 @@ class ETL:
     def __init__(
             self,
             logger: logging.Logger,
-            extractor: BaseExtractor,
+            extractor: PostgresExtractor,
             transformer: Transformer,
-            loader: BaseLoader,
+            loader: ElasticLoader,
             state: ModifiedState) -> None:
 
         self.extractor = extractor

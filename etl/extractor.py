@@ -33,32 +33,7 @@ MODELS = [
 ]
 
 
-class BaseExtractor:
-    """
-    Реализует выгрузку данных из БД через пайплайн
-    producer -> enricher
-    """
-    def __init__(
-            self,
-            state: ModifiedState,
-            batch_size: int,
-            logger: logging.Logger
-            ) -> None:
-        self.state = state
-        self.batch_size = batch_size
-        self.logger = logger
-
-    def extract_data(self, checkpoint: datetime):
-        pass
-
-    def _produce(self, checkpoint: datetime):
-        pass
-
-    def _enrich(self):
-        pass
-
-
-class PostgresExtractor(BaseExtractor):
+class PostgresExtractor:
 
     def __init__(
             self,
@@ -68,7 +43,9 @@ class PostgresExtractor(BaseExtractor):
             pg_conn
             ) -> None:
         self.conn = pg_conn
-        super().__init__(state, batch_size, logger)
+        self.state = state
+        self.batch_size = batch_size
+        self.logger = logger
 
     def _produce(self, checkpoint: Optional[datetime] = None) -> Generator:
         """Извлекает данные из БД батчами.

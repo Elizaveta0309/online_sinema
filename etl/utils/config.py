@@ -19,7 +19,7 @@ class ElasticConfig(BaseSettings):
 
 class RedisConfig(BaseSettings):
     host: str = Field('127.0.0.1', env='REDIS_HOST')
-    port: int = Field(7001, env='REDIS_PORT')
+    port: int = Field(6379, env='REDIS_PORT')
 
 
 class CommonConfig(BaseSettings):
