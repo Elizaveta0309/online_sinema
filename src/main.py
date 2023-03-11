@@ -1,15 +1,12 @@
-import logging
-
-import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from api.v1 import films
-from core import config
-from core.logger import LOGGING
-from db import elastic, redis
+from src.api.v1 import films
+from src.core import config
+from src.db import elastic, redis
+from src.postgres.create_db import check_bd_exists, create_db
 
 app = FastAPI(
     title=config.PROJECT_NAME,
@@ -35,9 +32,6 @@ async def shutdown():
 # Теги указываем для удобства навигации по документации
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 
-if __name__ == '__main__':
-    uvicorn.run(
-        'main:app',
-        host='0.0.0.0',
-        port=8000,
-    )
+# Если база postgres пустая, заполняем данными.
+if not check_bd_exists():
+    create_db()
