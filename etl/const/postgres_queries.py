@@ -2,14 +2,14 @@ GENRES_QUERY = '''
 WITH genres AS (
     SELECT g.*
     FROM content.genre g
-    WHERE g.modified >= %s
-    ORDER BY g.modified DESC
+    WHERE g.updated_at >= %s
+    ORDER BY g.updated_at DESC
 )
 SELECT
     g.name,
     g.id as uuid,
-    g.description as description,
-    g.modified,
+    g.description,
+    g.updated_at as modified,
     ARRAY_AGG(DISTINCT jsonb_build_object('fw_id', gfw.film_work_id)) AS array_id
 FROM genres g
 LEFT JOIN content.genre_film_work gfw
@@ -18,15 +18,15 @@ GROUP BY
     g.name,
     g.id,
     g.description,
-    g.modified
-ORDER BY g.modified DESC
+    modified
+ORDER BY modified DESC
 '''
 
 PERSONS_QUERY = '''
 SELECT
     p.id as uuid,
     p.full_name,
-    p.modified,
+    p.updated_at as modified,
    COALESCE (
        json_agg(
            DISTINCT jsonb_build_object(
@@ -39,9 +39,9 @@ SELECT
 FROM content.person p
 LEFT JOIN content.person_film_work pfw ON pfw.person_id = p.id
 LEFT JOIN content.film_work fw ON fw.id = pfw.film_work_id
-WHERE p.modified > %s
+WHERE p.updated_at > %s
 GROUP BY p.id
-ORDER BY p.modified DESC
+ORDER BY p.updated_at DESC
 '''
 
 FILMWORK_QUERY = '''
@@ -52,7 +52,7 @@ WITH movies as (
     fw.description,
     fw.rating as imdb_rating,
     fw.type,
-    fw.modified,
+    fw.updated_at as modified,
     ARRAY_AGG(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'actor') as actors_names,
     ARRAY_AGG(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'writer') as writers_names,
     ARRAY_AGG(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'director') as directors_names,

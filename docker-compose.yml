@@ -41,6 +41,23 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+  
+  etl:
+    container_name: etl
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    command: "python3 load_data.py"
+    env_file:
+      - ./.env
+    volumes:
+    - ./etl:/etl
+    depends_on:
+      - postgres
+      - elasticsearch
+      - redis
+      - api
+    restart: on-failure
 
 volumes:
   data:
