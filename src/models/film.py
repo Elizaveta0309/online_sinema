@@ -18,8 +18,11 @@ class ConfigMixin:
     json_dumps = orjson_dumps
 
 
-class Person(BaseModel, ConfigMixin):
-    id: str = Field(title='id персоны', example='1dhe6')
+class Model(BaseModel, ConfigMixin):
+    id: str = Field(title='id', example='1dhe6')
+
+
+class Person(Model):
     full_name: str = Field(title='Полное имя', example='Julia Roberts')
     role: str = Field(title='Роль', example='actor')
     films_ids: List[str] = Field(title='ids кинопроизведений', example=[
@@ -28,20 +31,18 @@ class Person(BaseModel, ConfigMixin):
     ])
 
 
-class Genre(BaseModel, ConfigMixin):
-    id: str = Field(title='id жанра', example='82dnd')
+class Genre(Model):
     name: str = Field(title='Название', example='Comedy')
 
 
-class Film(BaseModel, ConfigMixin):
-    id: str = Field(title='id кинопроизведения', example='3djd8')
+class Film(Model):
     type: str = Field(title='Тип кинопроизведения', example='movie')
     title: str = Field(title='Название', example='Pretty Woman')
     description: Union[str, None] = Field(title='Описание', example='Very good film!')
     creation_date: datetime = Field(title='Дата создания', example='1990-01-01')
     rating: float = Field(title='Рейтинг', example=9.4)
     age_limit: int = Field(title='Возрастной ценз', example=18, gt=0, default=0)
-    genres: List[Dict] = Field(title='Жанры', example=[
+    genre: List[Dict] = Field(title='Жанры', example=[
         {"name": "Comedy", "id": "6f822a92"},
         {"name": "Adventure", "id": "00f74939"}
     ])
@@ -52,6 +53,6 @@ class Film(BaseModel, ConfigMixin):
     writers: List[Dict] = Field(title='Жанры', example=[
         {"full_name": "J.F. Lawton", "id": "0ffdkdmks"}
     ])
-    directors: List[Dict] = Field(title='Жанры', example=[
+    director: List[Dict] = Field(title='Жанры', example=[
         {"full_name": "Harry Marshall", "id": "343vjmkl"},
     ])

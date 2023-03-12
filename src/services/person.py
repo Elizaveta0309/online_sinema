@@ -7,19 +7,19 @@ from redis.asyncio import Redis
 from src.api.v1.BaseService import BaseService
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import Film
+from src.models.film import Person
 
 
-class FilmService(BaseService):
+class PersonService(BaseService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.model = Film
-        self.index = 'movies'
+        self.model = Person
+        self.index = 'persons'
 
 
 @lru_cache()
-def get_film_service(
+def get_person_service(
         redis: Redis = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> FilmService:
-    return FilmService(redis, elastic)
+) -> PersonService:
+    return PersonService(redis, elastic)

@@ -1,13 +1,15 @@
-version: '3'
+version: '3.5'
 
 services:
-  api:
-    build: .
-    container_name: api
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./:/opt/app
+#  api:
+#    build: .
+#    container_name: api
+#    ports:
+#      - "8000:8000"
+#    volumes:
+#      - ./:/opt/app
+#    networks:
+#      - "proxynet"
 
   postgres:
     image: postgres
@@ -20,6 +22,8 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
+    networks:
+      - "proxynet"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.6.0
@@ -35,12 +39,20 @@ services:
       resources:
         limits:
           memory: 5000M
+    networks:
+      - "proxynet"
 
   redis:
     image: redis
     container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - "proxynet"
 
 volumes:
   data:
+
+networks:
+  proxynet:
+    name: custom_network

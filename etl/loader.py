@@ -2,8 +2,8 @@ import json
 import logging
 
 from elasticsearch import Elasticsearch
-from utils.state import ModifiedState
-from const import (
+from etl.utils.state import ModifiedState
+from etl.const import (
     filmwork_schema,
     genres_schema,
     persons_schema
