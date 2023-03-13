@@ -14,6 +14,7 @@ multidict==6.0.4
 orjson==3.8.7
 psycopg2==2.9.5
 pydantic==1.9.0
+python-dotenv==0.21.1
 redis==4.4.2
 starlette==0.13.6
 typing_extensions==4.5.0
