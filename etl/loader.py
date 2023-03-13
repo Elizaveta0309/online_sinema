@@ -11,18 +11,9 @@ from const import (
 
 
 INDEX_SCHEMAS = {
-    'movies': (
-        filmwork_schema.MAPPINGS,
-        filmwork_schema.SETTINGS,
-    ),
-    'persons': (
-        persons_schema.MAPPINGS,
-        persons_schema.SETTINGS,
-    ),
-    'genres': (
-        genres_schema.MAPPINGS,
-        genres_schema.SETTINGS,
-    )
+    'movies': filmwork_schema.MAPPING,
+    'persons': persons_schema.MAPPING,
+    'genres': genres_schema.MAPPING
 }
 
 
@@ -68,13 +59,12 @@ class ElasticLoader:
             return
 
         # Получаем настройки целевой схемы
-        index_mappings, index_settings = INDEX_SCHEMAS[index]
+        index_mapping = INDEX_SCHEMAS[index]
 
         # И создаем ее при необходимости
         self._init_index(
             name=index,
-            settings=index_settings,
-            mappings=index_mappings
+            mapping=index_mapping
         )
 
         # Преобразуем словари с данными в строку json-формата
@@ -101,8 +91,7 @@ class ElasticLoader:
 
     def _init_index(
         self,
-        settings: dict,
-        mappings: dict,
+        mapping: dict,
         name: str
     ) -> None:
         """Проверяет наличие схемы и инициализирует, если таковой нет.
@@ -115,7 +104,6 @@ class ElasticLoader:
         if not self.conn.indices.exists(index=name):
             self.conn.indices.create(
                 index=name,
-                settings=settings,
-                mappings=mappings
+                body=mapping
             )
             self.logger.info('Index schema initialized')
