@@ -4,11 +4,6 @@ from src.core.config import PAGE_SIZE
 
 
 class QueryParams:
-    SORT_MAPPING = {
-        'true': 'asc',
-        'false': 'desc'
-    }
-
     def __init__(
             self,
             page_number: int = Query(1, description='Page number'),
