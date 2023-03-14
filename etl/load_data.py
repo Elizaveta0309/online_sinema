@@ -79,5 +79,7 @@ if __name__ == '__main__':
             try:
                 etl.start()
             except Exception as e:
-                logger.error(f'Error while parsing and loading data: {e}')
+                logger.error(f'Error in etl process: {e}')
+                state.clear_modified_id_list()
+
             time.sleep(common_conf.sleep_time)
