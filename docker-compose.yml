@@ -47,7 +47,6 @@ services:
     build:
       context: ./etl
       dockerfile: Dockerfile
-    command: "python3 load_data.py"
     env_file:
       - ./.env
     volumes:

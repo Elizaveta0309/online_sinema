@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from pydantic.schema import Optional, List
@@ -53,6 +54,8 @@ class FilmworkModel(BaseModel):
     actors: Optional[List]
     writers: Optional[List]
     age_limit: Optional[int]
+    type: Optional[str]
+    creation_date: Optional[str]
 
     @validator(*NULLABLES)
     def valid_description(cls, value):
