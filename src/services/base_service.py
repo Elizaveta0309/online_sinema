@@ -1,8 +1,12 @@
+import logging
+import math
 from typing import Optional
 
+import elasticsearch
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from redis.asyncio import Redis
 
+from src.api.v1.query_params import QueryParams
 from src.core.config import CACHE_EXPIRE_IN_SECONDS
 from src.models.film import Model
 
@@ -14,8 +18,32 @@ class BaseService:
         self.model = None
         self.index = None
 
-    async def get_list(self):
-        ...
+    async def get_list(self, params: QueryParams):
+        from_ = (params.page_number - 1) * params.page_size
+
+        try:
+            data = await self.elastic.search(
+                index=self.index,
+                body={
+                    'from': from_,
+                    'size': params.page_size,
+                    'query': {
+                        'match_all': {}
+                    }
+                },
+                sort=f'{params.sort}:{params.asc}'
+            )
+        except elasticsearch.exceptions.RequestError as e:
+            logging.error(str(e))
+            return 'Wrong sort_by field'
+
+        total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
+
+        return {
+            'page_number': params.page_number,
+            'total_pages': total_pages,
+            'data': data
+        }
 
     async def get_by_id(self, object_id: str) -> Optional[Model]:
         obj = await self._get_object_from_cache(object_id)
@@ -39,4 +67,4 @@ class BaseService:
         return self.model.parse_raw(data) if data else None
 
     async def _put_object_to_cache(self, obj: Model):
-        await self.redis.set(obj.id, obj.json(), CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(obj.uuid, obj.json(), CACHE_EXPIRE_IN_SECONDS)

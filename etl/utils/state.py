@@ -4,7 +4,7 @@ from typing import Any
 
 import redis
 
-from etl.utils.backoff import backoff
+from utils.backoff import backoff
 
 
 class BaseStorage:

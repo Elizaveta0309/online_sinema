@@ -6,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY requirements.txt requirements.txt
+COPY .env .env
 COPY wait-for-it.sh wait-for-it.sh
 COPY run.sh run.sh
 RUN chmod +x wait-for-it.sh

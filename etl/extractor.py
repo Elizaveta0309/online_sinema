@@ -3,15 +3,15 @@ from datetime import datetime
 from typing import Generator, Optional
 
 
-from etl.const.postgres_queries import (
+from const.postgres_queries import (
     FILMWORK_QUERY,
     GENRES_QUERY,
     PERSONS_QUERY
 )
 
-from etl.models import PersonModel, GenreModel, FilmworkModel
+from models import PersonModel, GenreModel, FilmworkModel
 from psycopg2.extras import RealDictCursor
-from etl.utils.state import ModifiedState
+from utils.state import ModifiedState
 
 
 MODELS = [

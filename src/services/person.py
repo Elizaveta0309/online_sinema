@@ -4,10 +4,10 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from src.api.v1.BaseService import BaseService
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import Person
+from src.models.person import Person
+from src.services.base_service import BaseService
 
 
 class PersonService(BaseService):
