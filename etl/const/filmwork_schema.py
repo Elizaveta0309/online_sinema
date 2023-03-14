@@ -127,6 +127,13 @@ MAPPING = {
       },
       "age_limit": {
         "type": "integer"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "creation_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
       }
     }
   }
