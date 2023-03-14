@@ -17,8 +17,8 @@ REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
 # Настройки Elasticsearch
-ELASTIC_HOST = os.getenv('ELASTIC_HOST')
-ELASTIC_PORT = int(os.getenv('ELASTIC_PORT'))
+ES_HOST = os.getenv('ES_HOST')
+ES_PORT = int(os.getenv('ES_PORT'))
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
