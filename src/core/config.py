@@ -1,5 +1,6 @@
 import os
 from logging import config as logging_config
+
 from dotenv import load_dotenv
 
 from src.core.logger import LOGGING
@@ -28,3 +29,7 @@ POSTGRES_PORT = os.getenv('POSTGRES_PORT')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 POSTGRES_DB = os.getenv('POSTGRES_DB')
+
+CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
+PAGE_SIZE = 20

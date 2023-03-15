@@ -4,11 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.services.film import FilmService, get_film_service
 
-from src.models.film import Film 
-
+from src.models.film import Film
 
 router = APIRouter()
-
 
 
 # Внедряем FilmService с помощью Depends(get_film_service)
