@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Union, Dict, Optional
 
 # Используем pydantic для упрощения работы при перегонке данных из json в объекты
@@ -7,10 +8,10 @@ from src.models.base_model import Model
 
 
 class Film(Model):
-    # type: str = Field(title='Тип кинопроизведения', example='movie')
+    type: str = Field(title='Тип кинопроизведения', example='movie')
     title: str = Field(title='Название', example='Pretty Woman')
     description: Union[str, None] = Field(title='Описание', example='Very good film!')
-    # creation_date: datetime = Field(title='Дата создания', example='1990-01-01')
+    creation_date: Optional[datetime] = Field(None, title='Дата создания', example='1990-01-01')
     imdb_rating: float = Field(title='Рейтинг', example=9.4)
     age_limit: Optional[int] = Field(title='Возрастной ценз', example=18, gt=0, default=0)
     genre: List[Dict] = Field(title='Жанры', example=[
