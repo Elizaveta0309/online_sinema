@@ -6,7 +6,6 @@ from src.api.v1.query_params import SearchQueryParams, ListQueryParams
 from src.models.base_model import Model
 from src.services.film import FilmService, get_film_service
 from src.models.film import Film
-from src.core.config import FILMS_SEARCH_FIELD
 
 router = APIRouter()
 
@@ -27,4 +26,4 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
 
 @router.get("/search/")
 async def search_films(params: SearchQueryParams = Depends(), film_service: FilmService = Depends(get_film_service)):
-    return await film_service.search(params, FILMS_SEARCH_FIELD)
+    return await film_service.search(params)

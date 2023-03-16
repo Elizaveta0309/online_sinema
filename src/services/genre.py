@@ -6,6 +6,7 @@ from fastapi import Depends
 from src.db.elastic import get_elastic
 from src.models.genre import Genre
 from src.services.base_service import BaseService
+from src.core.config import GENRES_SEARCH_FIELD
 
 
 class GenreService(BaseService):
@@ -13,6 +14,7 @@ class GenreService(BaseService):
         super().__init__(*args, **kwargs)
         self.model = Genre
         self.index = 'genres'
+        self.search_field = GENRES_SEARCH_FIELD
 
 
 @lru_cache()
