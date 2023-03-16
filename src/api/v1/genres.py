@@ -6,7 +6,6 @@ from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.models.base_model import Model
 from src.models.genre import Genre
 from src.services.genre import GenreService, get_genre_service
-from src.core.config import GENRES_SEARCH_FIELD
 
 router = APIRouter()
 
@@ -24,7 +23,8 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
 
     return genre
 
-@router.get("/search/")
-async def search_genres(params: SearchQueryParams = Depends(), genre_service: GenreService = Depends(get_genre_service)):
-    return await genre_service.search(params, GENRES_SEARCH_FIELD)
 
+@router.get("/search/")
+async def search_genres(params: SearchQueryParams = Depends(),
+                        genre_service: GenreService = Depends(get_genre_service)):
+    return await genre_service.search(params)
