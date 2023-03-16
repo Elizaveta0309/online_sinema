@@ -18,6 +18,7 @@ class BaseService:
         self.elastic = elastic
         self.model = None
         self.index = None
+        self.search_field = None
 
     @cached(
         ttl=CACHE_EXPIRE_IN_SECONDS,
@@ -75,7 +76,7 @@ class BaseService:
         **get_redis_cache_conf(),
         key_builder=build_cache_key
     )
-    async def search(self, params: SearchQueryParams, search_field: str):  # TODO што-то сделать с этим search_field
+    async def search(self, params: SearchQueryParams):
         from_ = (params.page_number - 1) * params.page_size
 
         try:
@@ -86,7 +87,7 @@ class BaseService:
                     'size': params.page_size,
                     'query': {
                         'match': {
-                            search_field: {
+                            self.search_field: {
                                 'query': params.query,
                                 'fuzziness': 'AUTO',
                                 'operator': 'and',
