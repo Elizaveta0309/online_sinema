@@ -6,25 +6,26 @@ import elasticsearch
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from aiocache import cached
 
-
-from src.api.v1.query_params import QueryParams
+from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.core.config import CACHE_EXPIRE_IN_SECONDS
 from src.models.film import Model
 from src.db.redis import get_redis_cache_conf
 
 
 def build_cache_key(f, args, kwargs) -> str:
-    if isinstance(kwargs, QueryParams):
+    if isinstance(kwargs, ListQueryParams):
         query = f'{kwargs.page_size}:{kwargs.page_number}:{kwargs.sort}:{kwargs.asc}'
+    elif isinstance(kwargs, SearchQueryParams):
+        query = f'{kwargs.page_size}:{kwargs.page_number}:{kwargs.query}'
     else:
         query = str(kwargs)
 
     return (
-        f.__name__
-        + ':'
-        + str(args.index)
-        + ':'
-        + query
+            f.__name__
+            + ':'
+            + str(args.index)
+            + ':'
+            + query
     )
 
 
@@ -40,7 +41,7 @@ class BaseService:
         **get_redis_cache_conf(),
         key_builder=build_cache_key
     )
-    async def get_list(self, params: QueryParams):
+    async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
 
         try:
@@ -85,3 +86,36 @@ class BaseService:
         except NotFoundError:
             return None
         return self.model(**doc['_source'])
+
+    async def search(self, params: SearchQueryParams, search_field: str):
+        from_ = (params.page_number - 1) * params.page_size
+
+        try:
+            data = await self.elastic.search(
+                index=self.index,
+                body={
+                    'from': from_,
+                    'size': params.page_size,
+                    'query': {
+                        'match': {
+                            search_field: {
+                                'query': params.query,
+                                'fuzziness': 'AUTO',
+                                'operator': 'and',
+                                'minimum_should_match': '75%'
+                            }
+
+                        }
+                    },
+                }
+            )
+        except elasticsearch.exceptions.RequestError as e:
+            logging.error(str(e))
+
+        total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
+
+        return {
+            'page_number': params.page_number,
+            'total_pages': total_pages,
+            'data': data
+        }
