@@ -3,30 +3,14 @@ import math
 from typing import Optional
 
 import elasticsearch
-from elasticsearch import AsyncElasticsearch, NotFoundError
 from aiocache import cached
+from elasticsearch import AsyncElasticsearch, NotFoundError
 
 from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.core.config import CACHE_EXPIRE_IN_SECONDS
-from src.models.film import Model
+from src.core.utils import get_items_source, build_cache_key
 from src.db.redis import get_redis_cache_conf
-
-
-def build_cache_key(f, args, kwargs) -> str:
-    if isinstance(kwargs, ListQueryParams):
-        query = f'{kwargs.page_size}:{kwargs.page_number}:{kwargs.sort}:{kwargs.asc}'
-    elif isinstance(kwargs, SearchQueryParams):
-        query = f'{kwargs.page_size}:{kwargs.page_number}:{kwargs.query}'
-    else:
-        query = str(kwargs)
-
-    return (
-            f.__name__
-            + ':'
-            + str(args.index)
-            + ':'
-            + query
-    )
+from src.models.film import Model
 
 
 class BaseService:
@@ -43,7 +27,6 @@ class BaseService:
     )
     async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
-
         try:
             data = await self.elastic.search(
                 index=self.index,
@@ -54,13 +37,14 @@ class BaseService:
                         'match_all': {}
                     }
                 },
-                sort=f'{params.sort}:{params.asc}'
+                sort=f'{params.sort}:{params.asc}',
             )
         except elasticsearch.exceptions.RequestError as e:
             logging.error(str(e))
-            return 'Wrong sort_by field'
+            return {'error': 'wrong sort field'}
 
         total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
+        data = get_items_source(data)
 
         return {
             'page_number': params.page_number,
@@ -76,9 +60,7 @@ class BaseService:
     )
     async def get_by_id(self, object_id: str) -> Optional[Model]:
         obj = await self._get_object_from_elastic(object_id)
-        if not obj:
-            return None
-        return obj
+        return obj or None
 
     async def _get_object_from_elastic(self, object_id: str) -> Optional[Model]:
         try:
@@ -87,7 +69,13 @@ class BaseService:
             return None
         return self.model(**doc['_source'])
 
-    async def search(self, params: SearchQueryParams, search_field: str):
+    @cached(
+        ttl=CACHE_EXPIRE_IN_SECONDS,
+        noself=True,
+        **get_redis_cache_conf(),
+        key_builder=build_cache_key
+    )
+    async def search(self, params: SearchQueryParams, search_field: str):  # TODO што-то сделать с этим search_field
         from_ = (params.page_number - 1) * params.page_size
 
         try:
@@ -111,8 +99,10 @@ class BaseService:
             )
         except elasticsearch.exceptions.RequestError as e:
             logging.error(str(e))
+            return {'error': 'request error'}
 
         total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
+        data = get_items_source(data)
 
         return {
             'page_number': params.page_number,
