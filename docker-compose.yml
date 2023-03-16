@@ -5,7 +5,7 @@ services:
     build: .
     container_name: api
     ports:
-      - "8000:8000"
+      - "8000"
     volumes:
       - ./:/opt/app
 
@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "5432:5432"
+      - "5432"
     volumes:
       - data:/var/lib/postgresql/data
 
@@ -28,7 +28,7 @@ services:
       - xpack.security.enabled=false
       - discovery.type=single-node
     ports:
-      - "9200:9200"
+      - "9200"
     volumes:
       - data:/var/lib/elasticsearch/data
     deploy:
@@ -40,7 +40,7 @@ services:
     image: redis
     container_name: redis
     ports:
-      - "6379:6379"
+      - "6379"
 
   etl:
     container_name: etl
@@ -50,7 +50,7 @@ services:
     env_file:
       - ./.env
     volumes:
-    - ./etl:/etl
+      - ./etl:/etl
     depends_on:
       - postgres
       - elasticsearch
