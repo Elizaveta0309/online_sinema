@@ -4,20 +4,42 @@ from typing import Optional
 
 import elasticsearch
 from elasticsearch import AsyncElasticsearch, NotFoundError
-from redis.asyncio import Redis
+from aiocache import cached
+
 
 from src.api.v1.query_params import QueryParams
 from src.core.config import CACHE_EXPIRE_IN_SECONDS
 from src.models.film import Model
+from src.db.redis import get_redis_cache_conf
+
+
+def build_cache_key(f, args, kwargs) -> str:
+    if isinstance(kwargs, QueryParams):
+        query = f'{kwargs.page_size}:{kwargs.page_number}:{kwargs.sort}:{kwargs.asc}'
+    else:
+        query = str(kwargs)
+
+    return (
+        f.__name__
+        + ':'
+        + str(args.index)
+        + ':'
+        + query
+    )
 
 
 class BaseService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
+    def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
         self.model = None
         self.index = None
 
+    @cached(
+        ttl=CACHE_EXPIRE_IN_SECONDS,
+        noself=True,
+        **get_redis_cache_conf(),
+        key_builder=build_cache_key
+    )
     async def get_list(self, params: QueryParams):
         from_ = (params.page_number - 1) * params.page_size
 
@@ -45,14 +67,16 @@ class BaseService:
             'data': data
         }
 
+    @cached(
+        ttl=CACHE_EXPIRE_IN_SECONDS,
+        noself=True,
+        **get_redis_cache_conf(),
+        key_builder=build_cache_key
+    )
     async def get_by_id(self, object_id: str) -> Optional[Model]:
-        obj = await self._get_object_from_cache(object_id)
+        obj = await self._get_object_from_elastic(object_id)
         if not obj:
-            obj = await self._get_object_from_elastic(object_id)
-            if not obj:
-                return None
-            await self._put_object_to_cache(obj)
-
+            return None
         return obj
 
     async def _get_object_from_elastic(self, object_id: str) -> Optional[Model]:
@@ -61,10 +85,3 @@ class BaseService:
         except NotFoundError:
             return None
         return self.model(**doc['_source'])
-
-    async def _get_object_from_cache(self, object_id: str) -> Optional[Model]:
-        data = await self.redis.get(object_id)
-        return self.model.parse_raw(data) if data else None
-
-    async def _put_object_to_cache(self, obj: Model):
-        await self.redis.set(obj.uuid, obj.json(), CACHE_EXPIRE_IN_SECONDS)
