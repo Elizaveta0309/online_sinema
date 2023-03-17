@@ -14,11 +14,11 @@ from src.models.film import Model
 
 
 class BaseService:
-    def __init__(self, elastic: AsyncElasticsearch):
+    def __init__(self, elastic: AsyncElasticsearch, search_field: str):
         self.elastic = elastic
+        self.search_field = search_field
         self.model = None
         self.index = None
-        self.search_field = None
 
     @cached(
         ttl=CACHE_EXPIRE_IN_SECONDS,
