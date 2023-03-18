@@ -8,7 +8,7 @@ from aiocache import (
 from aiocache.serializers import PickleSerializer
 from src.core import config
 
-redis: Optional[Redis] = None
+redis: Redis | None = None
 
 
 # Функция понадобится при внедрении зависимостей
