@@ -37,3 +37,7 @@ PAGE_SIZE = 20
 FILMS_SEARCH_FIELD = 'title'
 PERSONS_SEARCH_FIELD = 'full_name'
 GENRES_SEARCH_FIELD = 'name'
+
+FILM_NOT_FOUND_MESSAGE = 'film not found'
+PERSON_NOT_FOUND_MESSAGE = 'person not found'
+GENRE_NOT_FOUND_MESSAGE = 'genre not found'

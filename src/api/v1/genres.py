@@ -6,6 +6,7 @@ from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.models.base_model import Model
 from src.models.genre import Genre
 from src.services.genre import GenreService, get_genre_service
+from src.core.config import GENRE_NOT_FOUND_MESSAGE
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ async def genres(params: ListQueryParams = Depends(), genre_service: GenreServic
 async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Model:
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=GENRE_NOT_FOUND_MESSAGE)
 
     return genre
 
