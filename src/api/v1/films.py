@@ -10,12 +10,14 @@ from src.models.film import Film
 router = APIRouter()
 
 
-@router.get('/')
+@router.get('/', description='Метод позволяет получить список всех фильмов',
+            response_description='List of all films')
 async def films(params: ListQueryParams = Depends(), film_service: FilmService = Depends(get_film_service)):
     return await film_service.get_list(params)
 
 
-@router.get('/{film_id}', response_model=Film)
+@router.get('/{film_id}', response_model=Film, description='Метод позволяет получить информацию о фильме по id',
+            response_description='Info about the film')
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Model:
     film = await film_service.get_by_id(film_id)
     if not film:
@@ -24,6 +26,7 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
     return film
 
 
-@router.get("/search/")
+@router.get("/search/", description='Метод осуществляет поиск фильма по названию',
+            response_description='Result of search, sorted by max_score')
 async def search_films(params: SearchQueryParams = Depends(), film_service: FilmService = Depends(get_film_service)):
     return await film_service.search(params)
