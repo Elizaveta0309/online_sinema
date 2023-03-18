@@ -1,6 +1,5 @@
 from datetime import datetime
 import logging
-from typing import Optional
 from extractor import PostgresExtractor
 from transformer import Transformer
 from loader import ElasticLoader
@@ -35,7 +34,7 @@ class ETL:
         self.logger = logger
         self.state = state
 
-    def start(self, checkpoint: Optional[datetime] = None):
+    def start(self, checkpoint: datetime | None = None):
         """Совершает ETL-процедуру.
 
         Args:

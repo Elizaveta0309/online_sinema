@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union, Dict
+from typing import Union
 
 # Используем pydantic для упрощения работы при перегонке данных из json в объекты
 from pydantic import Field
@@ -14,17 +14,17 @@ class Film(Model):
     creation_date: datetime | None = Field(None, title='Дата создания', example='1990-01-01')
     imdb_rating: float = Field(title='Рейтинг', example=9.4)
     age_limit: int | None = Field(title='Возрастной ценз', example=18, gt=0, default=0)
-    genre: List[Dict] = Field(title='Жанры', example=[
+    genre: list[dict] = Field(title='Жанры', example=[
         {"name": "Comedy", "id": "6f822a92"},
         {"name": "Adventure", "id": "00f74939"}
     ])
-    actors: List[Dict] = Field(title='Жанры', example=[
+    actors: list[dict] = Field(title='Жанры', example=[
         {"full_name": "Julia Roberts", "id": "474hfnvm"},
         {"full_name": "Richard Gir", "id": "47ggfnvm"}
     ])
-    writers: List[Dict] = Field(title='Жанры', example=[
+    writers: list[dict] = Field(title='Жанры', example=[
         {"full_name": "J.F. Lawton", "id": "0ffdkdmks"}
     ])
-    directors: List[Dict] = Field(title='Жанры', example=[
+    directors: list[dict] = Field(title='Жанры', example=[
         {"full_name": "Harry Marshall", "id": "343vjmkl"},
     ])
