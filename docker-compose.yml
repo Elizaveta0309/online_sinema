@@ -58,5 +58,14 @@ services:
       - api
     restart: on-failure
 
+  nginx:
+    build: nginx
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    ports:
+      - "80:80"
+
 volumes:
   data:
