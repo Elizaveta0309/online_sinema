@@ -6,6 +6,7 @@ from src.api.v1.query_params import SearchQueryParams, ListQueryParams
 from src.models.base_model import Model
 from src.services.film import FilmService, get_film_service
 from src.models.film import Film
+from .constants import FILM_NOT_FOUND_MESSAGE
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def films(params: ListQueryParams = Depends(), film_service: FilmService =
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Model:
     film = await film_service.get_by_id(film_id)
     if not film:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=FILM_NOT_FOUND_MESSAGE)
 
     return film
 
