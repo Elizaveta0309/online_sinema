@@ -1,6 +1,5 @@
 import logging
 import math
-from typing import Optional
 
 import elasticsearch
 from aiocache import cached
@@ -59,11 +58,11 @@ class BaseService:
         **get_redis_cache_conf(),
         key_builder=build_cache_key
     )
-    async def get_by_id(self, object_id: str) -> Optional[Model]:
+    async def get_by_id(self, object_id: str) -> Model | None:
         obj = await self._get_object_from_elastic(object_id)
         return obj or None
 
-    async def _get_object_from_elastic(self, object_id: str) -> Optional[Model]:
+    async def _get_object_from_elastic(self, object_id: str) -> Model | None:
         try:
             doc = await self.elastic.get(self.index, object_id)
         except NotFoundError:

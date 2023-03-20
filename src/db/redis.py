@@ -1,14 +1,12 @@
 from functools import lru_cache
-from typing import Optional
 from redis.asyncio import Redis
-from typing import Dict
 from aiocache import (
     RedisCache,
 )
 from aiocache.serializers import PickleSerializer
 from src.core import config
 
-redis: Optional[Redis] = None
+redis: Redis | None = None
 
 
 # Функция понадобится при внедрении зависимостей
@@ -17,7 +15,7 @@ async def get_redis() -> Redis:
 
 
 @lru_cache()
-def get_redis_cache_conf() -> Dict:
+def get_redis_cache_conf() -> dict:
     return {
         'cache': RedisCache,
         'serializer': PickleSerializer(),

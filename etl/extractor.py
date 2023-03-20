@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Generator, Optional
+from typing import Generator
 
 
 from const.postgres_queries import (
@@ -47,7 +47,7 @@ class PostgresExtractor:
         self.batch_size = batch_size
         self.logger = logger
 
-    def _produce(self, checkpoint: Optional[datetime] = None) -> Generator:
+    def _produce(self, checkpoint: datetime | None = None) -> Generator:
         """Извлекает данные из БД батчами.
 
         Args:
@@ -127,7 +127,7 @@ class PostgresExtractor:
 
         return data
 
-    def extract_data(self, checkpoint: Optional[datetime] = None) -> Generator:
+    def extract_data(self, checkpoint: datetime | None = None) -> Generator:
         """Извлекает данные из БД батчами.
 
         Args:
