@@ -6,7 +6,7 @@ from aiocache import cached
 from elasticsearch import AsyncElasticsearch, NotFoundError
 
 from src.api.v1.query_params import ListQueryParams, SearchQueryParams
-from src.core.config import CACHE_EXPIRE_IN_SECONDS
+from src.core.config import settings
 from src.core.utils import get_items_source, build_cache_key
 from src.db.redis import get_redis_cache_conf
 from src.models.film import Model
@@ -20,7 +20,7 @@ class BaseService:
         self.index = None
 
     @cached(
-        ttl=CACHE_EXPIRE_IN_SECONDS,
+        ttl=settings.CACHE_EXPIRE_IN_SECONDS,
         noself=True,
         **get_redis_cache_conf(),
         key_builder=build_cache_key
@@ -53,7 +53,7 @@ class BaseService:
         }
 
     @cached(
-        ttl=CACHE_EXPIRE_IN_SECONDS,
+        ttl=settings.CACHE_EXPIRE_IN_SECONDS,
         noself=True,
         **get_redis_cache_conf(),
         key_builder=build_cache_key
@@ -70,7 +70,7 @@ class BaseService:
         return self.model(**doc['_source'])
 
     @cached(
-        ttl=CACHE_EXPIRE_IN_SECONDS,
+        ttl=settings.CACHE_EXPIRE_IN_SECONDS,
         noself=True,
         **get_redis_cache_conf(),
         key_builder=build_cache_key

@@ -1,13 +1,13 @@
 from fastapi import Query
 
-from src.core.config import PAGE_SIZE
+from src.core.config import settings
 
 
 class ListQueryParams:
     def __init__(
             self,
             page_number: int = Query(1, description='Page number'),
-            page_size: int = Query(PAGE_SIZE, description='Page size'),
+            page_size: int = Query(settings.PAGE_SIZE, description='Page size'),
             sort: str = Query('uuid', description='Sort field')
     ):
         self.page_number = page_number
@@ -25,7 +25,7 @@ class SearchQueryParams:
     def __init__(
             self,
             page_number: int = Query(1, description='Page number'),
-            page_size: int = Query(PAGE_SIZE, description='Page size'),
+            page_size: int = Query(settings.PAGE_SIZE, description='Page size'),
             query: str = Query('star', description='Search value')
     ):
         self.page_number = page_number

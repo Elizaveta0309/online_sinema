@@ -3,14 +3,14 @@ from contextlib import closing
 
 import psycopg2
 
-from src.core.config import POSTGRES_HOST, POSTGRES_USER, POSTGRES_PORT, POSTGRES_PASSWORD, POSTGRES_DB
+from src.core.config import settings
 
 POSTGRES_CREDENTIALS = {
-    'host': POSTGRES_HOST,
-    'port': POSTGRES_PORT,
-    'user': POSTGRES_USER,
-    'password': POSTGRES_PASSWORD,
-    'dbname': POSTGRES_DB,
+    'host': settings.POSTGRES_HOST,
+    'port': settings.POSTGRES_PORT,
+    'user': settings.POSTGRES_USER,
+    'password': settings.POSTGRES_PASSWORD,
+    'dbname': settings.POSTGRES_DB,
 }
 
 
