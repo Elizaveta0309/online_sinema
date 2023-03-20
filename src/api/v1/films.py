@@ -6,7 +6,7 @@ from src.api.v1.query_params import SearchQueryParams, ListQueryParams
 from src.models.base_model import Model
 from src.services.film import FilmService, get_film_service
 from src.models.film import Film
-from src.core.config import FILM_NOT_FOUND_MESSAGE
+from .constants import FILM_NOT_FOUND_MESSAGE
 
 router = APIRouter()
 

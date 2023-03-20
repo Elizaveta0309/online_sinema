@@ -6,7 +6,7 @@ from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.models.base_model import Model
 from src.models.person import Person
 from src.services.person import PersonService, get_person_service
-from src.core.config import PERSON_NOT_FOUND_MESSAGE
+from .constants import PERSON_NOT_FOUND_MESSAGE
 
 router = APIRouter()
 

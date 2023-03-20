@@ -6,7 +6,7 @@ from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.models.base_model import Model
 from src.models.genre import Genre
 from src.services.genre import GenreService, get_genre_service
-from src.core.config import GENRE_NOT_FOUND_MESSAGE
+from .constants import GENRE_NOT_FOUND_MESSAGE
 
 router = APIRouter()
 
