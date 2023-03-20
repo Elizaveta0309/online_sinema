@@ -19,29 +19,26 @@ class BaseService:
         self.model = None
         self.index = None
 
-    @cached(
-        ttl=CACHE_EXPIRE_IN_SECONDS,
-        noself=True,
-        **get_redis_cache_conf(),
-        key_builder=build_cache_key
-    )
+    # @cached(
+    #     ttl=CACHE_EXPIRE_IN_SECONDS,
+    #     noself=True,
+    #     **get_redis_cache_conf(),
+    #     key_builder=build_cache_key
+    # )
     async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
-        try:
-            data = await self.elastic.search(
-                index=self.index,
-                body={
-                    'from': from_,
-                    'size': params.page_size,
-                    'query': {
-                        'match_all': {}
-                    }
-                },
-                sort=f'{params.sort}:{params.asc}',
-            )
-        except elasticsearch.exceptions.RequestError as e:
-            logging.error(str(e))
-            return {'error': 'wrong sort field'}
+        data = await self.elastic.search(
+            index=self.index,
+            body={
+                'from': from_,
+                'size': params.page_size,
+                'query': {
+                    'match_all': {}
+                }
+            },
+            sort=f'{params.sort}:{params.asc}',
+        )
+
 
         total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
         data = get_items_source(data)
