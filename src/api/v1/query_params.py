@@ -1,6 +1,6 @@
 from fastapi import Query
 
-from src.core.config import PAGE_SIZE
+from src.core.config import settings
 
 
 class ListQueryParams:

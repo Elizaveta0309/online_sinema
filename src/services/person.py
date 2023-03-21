@@ -3,7 +3,7 @@ from functools import lru_cache
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
-from src.core.config import PERSONS_SEARCH_FIELD
+from src.core.config import settings
 from src.db.elastic import get_elastic
 from src.models.person import Person
 from src.services.base_service import BaseService
@@ -20,4 +20,4 @@ class PersonService(BaseService):
 def get_person_service(
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(elastic, PERSONS_SEARCH_FIELD)
+    return PersonService(elastic, settings.PERSONS_SEARCH_FIELD)
