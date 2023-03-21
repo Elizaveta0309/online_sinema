@@ -3,8 +3,7 @@ def get_items_source(data):
 
 
 def build_cache_key(f, args, obj) -> str:
-    query = ':'.join(map(str, obj.__dict__.values()))
-
+    query = obj if isinstance(obj, str) else ':'.join(map(str, obj.__dict__.values()))
     return (
             f.__name__
             + ':'
