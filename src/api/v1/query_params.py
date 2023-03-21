@@ -6,9 +6,22 @@ from src.core.config import settings
 class ListQueryParams:
     def __init__(
             self,
-            page_number: int = Query(1, description='Page number'),
-            page_size: int = Query(settings.PAGE_SIZE, description='Page size'),
-            sort: str = Query('uuid', description='Sort field')
+            page_number: int = Query(
+                default=1,
+                description='Page number',
+                ge=1,
+                le=1000000
+            ),
+            page_size: int = Query(
+                PAGE_SIZE,
+                description='Page size',
+                ge=10,
+                le=100
+            ),
+            sort: str = Query(
+                default='uuid',
+                description='Sort field'
+            )
     ):
         self.page_number = page_number
         self.page_size = page_size
@@ -24,9 +37,22 @@ class ListQueryParams:
 class SearchQueryParams:
     def __init__(
             self,
-            page_number: int = Query(1, description='Page number'),
-            page_size: int = Query(settings.PAGE_SIZE, description='Page size'),
-            query: str = Query('star', description='Search value')
+            page_number: int = Query(
+                default=1,
+                description='Page number',
+                ge=1,
+                le=1000000
+            ),
+            page_size: int = Query(
+                default=PAGE_SIZE,
+                description='Page size',
+                ge=10,
+                le=100
+            ),
+            query: str = Query(
+                default='star',
+                description='Search value'
+            )
     ):
         self.page_number = page_number
         self.page_size = page_size

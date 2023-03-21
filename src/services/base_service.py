@@ -27,21 +27,18 @@ class BaseService:
     )
     async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
-        try:
-            data = await self.elastic.search(
-                index=self.index,
-                body={
-                    'from': from_,
-                    'size': params.page_size,
-                    'query': {
-                        'match_all': {}
-                    }
-                },
-                sort=f'{params.sort}:{params.asc}',
-            )
-        except elasticsearch.exceptions.RequestError as e:
-            logging.error(str(e))
-            return {'error': 'wrong sort field'}
+        data = await self.elastic.search(
+            index=self.index,
+            body={
+                'from': from_,
+                'size': params.page_size,
+                'query': {
+                    'match_all': {}
+                }
+            },
+            sort=f'{params.sort}:{params.asc}',
+        )
+
 
         total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
         data = get_items_source(data)
