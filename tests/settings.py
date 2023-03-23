@@ -1,4 +1,4 @@
-from tests.testdata.es_mapping import mapping
+from testdata.es_mapping import mapping
 from pydantic import BaseSettings, Field
 
 

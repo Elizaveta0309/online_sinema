@@ -2,7 +2,7 @@ import uuid
 
 import aiohttp
 import pytest
-from tests.settings import test_settings
+from settings import test_settings
 
 
 @pytest.mark.asyncio

@@ -4,8 +4,8 @@ from typing import List
 import pytest
 from elasticsearch import AsyncElasticsearch, BadRequestError
 
-from tests.settings import test_settings
-from tests.testdata.es_mapping import mapping
+from settings import test_settings
+from testdata.es_mapping import mapping
 
 
 @pytest.fixture(scope='session')
