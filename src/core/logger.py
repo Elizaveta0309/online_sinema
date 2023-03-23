@@ -53,6 +53,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'backoff': {
+            'handlers': LOG_DEFAULT_HANDLERS,
+            'level': 'INFO'
+        }
     },
     'root': {
         'level': 'INFO',
