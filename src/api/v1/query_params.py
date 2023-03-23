@@ -13,7 +13,7 @@ class ListQueryParams:
                 le=1000000
             ),
             page_size: int = Query(
-                PAGE_SIZE,
+                settings.PAGE_SIZE,
                 description='Page size',
                 ge=10,
                 le=100
@@ -44,7 +44,7 @@ class SearchQueryParams:
                 le=1000000
             ),
             page_size: int = Query(
-                default=PAGE_SIZE,
+                default=settings.PAGE_SIZE,
                 description='Page size',
                 ge=10,
                 le=100
