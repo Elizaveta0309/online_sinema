@@ -48,14 +48,3 @@ services:
       - ./nginx/configs:/etc/nginx/conf.d:ro
     ports:
       - "80:80"
-
-  etl-test:
-    container_name: etl-test
-    build:
-      dockerfile: etl/Dockerfile
-      context: .
-    env_file:
-      - api/.env
-    volumes:
-      - ./etl:/etl
-    restart: on-failure
