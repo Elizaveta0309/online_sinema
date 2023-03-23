@@ -5,6 +5,8 @@ WORKDIR /opt/tests
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+RUN apt-get update && apt-get install -y curl
+
 COPY requirements.txt requirements.txt
 COPY wait-for-it.sh wait-for-it.sh
 COPY run.sh run.sh

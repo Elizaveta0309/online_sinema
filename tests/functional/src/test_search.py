@@ -5,11 +5,8 @@ import pytest
 from tests.settings import test_settings
 
 
-#  Название теста должно начинаться со слова `test_`
-#  Любой тест с асинхронными вызовами нужно оборачивать декоратором `pytest.mark.asyncio`, который следит за запуском и работой цикла событий.
-
 @pytest.mark.asyncio
-async def test_search(es_write_data):
+async def test_search(es_write_data, es_delete_index):
     es_data = [{
         'uuid': str(uuid.uuid4()),
         "imdb_rating": 3.5,
@@ -94,9 +91,10 @@ async def test_search(es_write_data):
     query_data = {'query': 'The Star'}
     async with session.get(url, params=query_data) as response:
         body = await response.json()
-        headers = response.headers
         status = response.status
     await session.close()
 
     assert status == 200
     assert len(body['data']) == 20
+
+    await es_delete_index('movies')
