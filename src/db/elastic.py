@@ -9,6 +9,7 @@ es: AsyncElasticsearch | None = None
 
 logger = getLogger()
 
+
 class AsyncElasticsearchStorage(Storage):
     def __init__(self, client: AsyncElasticsearch) -> None:
         super().__init__()
@@ -17,7 +18,8 @@ class AsyncElasticsearchStorage(Storage):
     @backoff.on_exception(backoff.expo,
                           elasticsearch.ConnectionError,
                           max_time=settings.STORAGE_BACKOFF_MAX_TIME,
-                          factor=settings.BACKOFF_FACTOR)
+                          factor=settings.BACKOFF_FACTOR,
+                          raise_on_giveup=True)
     async def get(self, index: str, id: str):
         try:
             doc = await self.client.get(index=index, id=id)
@@ -29,7 +31,8 @@ class AsyncElasticsearchStorage(Storage):
     @backoff.on_exception(backoff.expo,
                           elasticsearch.ConnectionError,
                           max_time=settings.STORAGE_BACKOFF_MAX_TIME,
-                          factor=settings.BACKOFF_FACTOR)
+                          factor=settings.BACKOFF_FACTOR,
+                          raise_on_giveup=True)
     async def search(self, index: str, body: dict, sort: str | None = None):
         doc = await self.client.search(
             index=index,

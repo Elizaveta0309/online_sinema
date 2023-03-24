@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     FILMS_SEARCH_FIELD = 'title'
     PERSONS_SEARCH_FIELD = 'full_name'
     GENRES_SEARCH_FIELD = 'name'
-    STORAGE_BACKOFF_MAX_TIME = 20
+    STORAGE_BACKOFF_MAX_TIME = 5
     BACKOFF_FACTOR = 2
 
     class Config:
