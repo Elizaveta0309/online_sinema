@@ -1,10 +1,9 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
 from src.core.config import settings
-from src.db.elastic import get_elastic
+from src.db.elastic import AsyncElasticsearchStorage, get_elastic
 from src.models.film import Film
 from src.services.base_service import BaseService
 
@@ -19,6 +18,6 @@ class FilmService(BaseService):
 
 @lru_cache()
 def get_film_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+        elastic: AsyncElasticsearchStorage = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(elastic, settings.FILMS_SEARCH_FIELD)
