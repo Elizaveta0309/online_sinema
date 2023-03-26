@@ -1,4 +1,4 @@
-mapping = {
+MOVIES_MAPPING = {
     "settings": {
         "refresh_interval": "1s",
         "analysis": {
