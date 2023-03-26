@@ -8,7 +8,7 @@ from pydantic import BaseSettings, Field
 
 
 class TestSettings(BaseSettings):
-    es_host: str = Field('http://localhost:9200')
+    es_host: str = Field('http://elasticsearch-test:9200')
 
     es_id_field: str = 'uuid'
 
@@ -25,7 +25,7 @@ class TestSettings(BaseSettings):
     persons_data: list = PERSONS_DATA
 
     redis_host: str = 'redis-test:6379'
-    service_url: str = 'http://localhost:8000'
+    service_url: str = 'http://api-test:8000'
 
 
 test_settings = TestSettings()
