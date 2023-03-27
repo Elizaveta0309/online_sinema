@@ -1,4 +1,6 @@
 import pytest
+from aiocache.serializers import PickleSerializer
+
 from tests.settings import test_settings
 from tests.testdata.movies_testdata.movie_model import Movie
 
@@ -55,5 +57,39 @@ async def test_one_film(make_get_request, es_write_data, es_delete_index, query_
     if response.status == HTTPStatus.OK:
         assert Movie(**body)
     await es_delete_index(test_settings.movies_index)
+
+
+@pytest.mark.parametrize(
+    'index, test_data, endpoint, query_data, expected_answer',
+    [
+        (
+                'movies',
+                (test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping),
+                '/api/v1/films',
+                {'page_number': 1, 'page_size': 20},
+                {'status': HTTPStatus.OK, 'cache_key': "main:get_list:movies:1:20:uuid:asc"}
+         ),
+    ]
+)
+@pytest.mark.asyncio
+async def test_film_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data,
+                          endpoint, query_data, expected_answer):
+    await es_write_data(*test_data)
+    response = await make_get_request(endpoint, query_data)
+    body = await response.json()
+
+    assert response.status == expected_answer['status']
+
+    cache_data = await aioredis_pool.get(expected_answer['cache_key'])
+    cache_dict = PickleSerializer().loads(cache_data)
+
+    assert body['page_number'] == cache_dict['page_number']
+    assert body['total_pages'] == cache_dict['total_pages']
+    assert len(body['data']) == len(cache_dict['data'])
+    assert body['data'][0] == cache_dict['data'][0]
+
+    await aioredis_pool.flushall()
+    await es_delete_index(index)
+
 
 
