@@ -1,5 +1,6 @@
 import json
 from typing import List
+import aioredis
 
 import pytest
 from aiohttp import ClientSession
@@ -22,6 +23,12 @@ async def client_session():
     await session.close()
 
 
+@pytest.fixture()
+async def aioredis_pool():
+    redis_host = test_settings.redis_host
+    pool = await aioredis.from_url(f"redis://{redis_host}")
+    yield pool
+    await pool.close()
 
 
 @pytest.fixture
