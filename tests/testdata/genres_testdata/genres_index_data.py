@@ -1,7 +1,7 @@
 import uuid
 
 GENRES_DATA = [
-    {'uuid': str(uuid.uuid4()),
+    {'uuid': 'genre_id',
      'name': "Action"
      } for _ in range(60)
 ]

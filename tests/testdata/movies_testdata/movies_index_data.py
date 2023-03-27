@@ -1,7 +1,7 @@
 import uuid
 
 MOVIES_DATA = [{
-        'uuid': str(uuid.uuid4()),
+        'uuid': 'movie_id',
         "imdb_rating": 3.5,
         "genre": [
             {
