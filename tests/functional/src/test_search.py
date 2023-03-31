@@ -1,3 +1,4 @@
+import time
 import pytest
 from aiocache.serializers import PickleSerializer
 from tests.settings import test_settings
@@ -11,7 +12,7 @@ from http import HTTPStatus
                 'movies',
                 (test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping),
                 '/api/v1/films/search/',
-                {'query': 'The Star'},
+                {'query': 'Star'},
                 {'status': HTTPStatus.OK, 'ans_len': 20}
             ),
             (
@@ -27,12 +28,35 @@ from http import HTTPStatus
                 '/api/v1/persons/search/',
                 {'query': 'Jim'},
                 {'status': HTTPStatus.OK, 'ans_len': 20}
+            ),
+            (
+                'movies',
+                (test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping),
+                '/api/v1/films/search/',
+                {'query': 'Lorem Ipsum'},
+                {'status': HTTPStatus.OK, 'ans_len': 0}
+            ),
+            (
+                'genres',
+                (test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping),
+                '/api/v1/genres/search/',
+                {'query': 'Lorem Ipsum'},
+                {'status': HTTPStatus.OK, 'ans_len': 0}
+            ),
+            (
+                'persons',
+                (test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping),
+                '/api/v1/persons/search/',
+                {'query': 'Lorem Ipsum'},
+                {'status': HTTPStatus.OK, 'ans_len': 0}
             )
         ]
 )
 @pytest.mark.asyncio
-async def test_search_endpoints(es_write_data, es_delete_index, make_get_request, index, test_data, endpoint, query_data, expected_answer):
+async def test_search_endpoints(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
+    await aioredis_pool.flushall()
+
     response = await make_get_request(endpoint, query_data)
     body = await response.json()
 
@@ -49,28 +73,30 @@ async def test_search_endpoints(es_write_data, es_delete_index, make_get_request
                 'movies',
                 (test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping),
                 '/api/v1/films/search/',
-                {'query': 'The Star', 'page_number': 2, 'page_size': 10},
-                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 6}
+                {'query': 'Star', 'page_number': 2, 'page_size': 10},
+                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 7}
             ),
             (
                 'genres',
                 (test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping),
                 '/api/v1/genres/search/',
                 {'query': 'Action', 'page_number': 2, 'page_size': 10},
-                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 6}
+                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 7}
             ),
             (
                 'persons',
                 (test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping),
                 '/api/v1/persons/search/',
                 {'query': 'Jim', 'page_number': 2, 'page_size': 10},
-                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 6}
+                {'status': HTTPStatus.OK, 'ans_len': 10, 'page_number': 2, 'total_pages': 7}
             )
         ]
 )
 @pytest.mark.asyncio
-async def test_search_pagination(es_write_data, es_delete_index, make_get_request, index, test_data, endpoint, query_data, expected_answer):
+async def test_search_pagination(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
+    await aioredis_pool.flushall()
+
     response = await make_get_request(endpoint, query_data)
     body = await response.json()
 
@@ -90,8 +116,8 @@ async def test_search_pagination(es_write_data, es_delete_index, make_get_reques
                 'movies',
                 (test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping),
                 '/api/v1/films/search/',
-                {'query': 'The Star', 'page_number': 2, 'page_size': 10},
-                {'status': HTTPStatus.OK, 'cache_key': "main:search:movies:2:10:The Star"}
+                {'query': 'Star', 'page_number': 2, 'page_size': 10},
+                {'status': HTTPStatus.OK, 'cache_key': "main:search:movies:2:10:Star"}
             ),
             (
                 'genres',
@@ -112,6 +138,8 @@ async def test_search_pagination(es_write_data, es_delete_index, make_get_reques
 @pytest.mark.asyncio
 async def test_search_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
+    await aioredis_pool.flushall()
+
     response = await make_get_request(endpoint, query_data)
     body = await response.json()
 
