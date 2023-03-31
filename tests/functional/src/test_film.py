@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from aiocache.serializers import PickleSerializer
+
 from tests.settings import test_settings
 from tests.testdata.movies_testdata.movie_model import Movie
 
@@ -38,7 +39,7 @@ async def test_films(make_get_request, es_write_data, es_delete_index, query_dat
     'query_data, expected_answer',
     [
         (
-                {'id': 'movie_id'},
+                {'id': test_settings.persons_data[0]['uuid']},
                 {'status': HTTPStatus.OK}
         ),
         (

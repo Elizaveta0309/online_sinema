@@ -39,7 +39,7 @@ def es_write_data(es_client):
             bulk_query.append(
                 {
                     '_index': index,
-                    '_id': f'{index[:-1]}_id',
+                    '_id': row['uuid'],
                     '_source': row
                 }
             )

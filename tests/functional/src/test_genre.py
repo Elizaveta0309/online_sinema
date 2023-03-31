@@ -40,17 +40,17 @@ async def test_genres(make_get_request, es_write_data, es_delete_index, query_da
     'query_data, expected_answer',
     [
         (
-                {'id': 'genre_id'},
+                {'id': test_settings.genres_data[0]['uuid']},
                 {'status': HTTPStatus.OK}
         ),
         (
-                {'id': 'this_id_doesnt_exist'},
+                {'id': 'this_id_doesnt_exists'},
                 {'status': HTTPStatus.NOT_FOUND}
         ),
     ]
 )
 @pytest.mark.asyncio
-async def test_one_genre(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
+async def test_one_genre(make_get_request, es_write_data, es_delete_index, query_data, expected_answer, aioredis_pool):
     await es_write_data(test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping)
     response = await make_get_request('/api/v1/genres/' + query_data['id'], query_data)
     body = await response.json()
