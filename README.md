@@ -25,3 +25,17 @@ docker-compose up -d
 ```
 
 Документация станет доступна по адресу http://localhost/api/openapi
+
+### Запуск тестов
+
+В терминале войдите в контейнер с тестами
+
+```
+docker exec -it tests bash
+```
+
+Запустите тесты
+
+```
+pytest
+```
