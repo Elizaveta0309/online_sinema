@@ -50,7 +50,7 @@ async def test_persons(make_get_request, es_write_data, es_delete_index, query_d
     ]
 )
 @pytest.mark.asyncio
-async def test_one_person(make_get_request, es_write_data, es_delete_index, query_data, expected_answer, aioredis_pool):
+async def test_one_person(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping)
     response = await make_get_request('/api/v1/persons/' + query_data['id'], query_data)
     body = await response.json()

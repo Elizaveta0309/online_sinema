@@ -50,7 +50,7 @@ async def test_genres(make_get_request, es_write_data, es_delete_index, query_da
     ]
 )
 @pytest.mark.asyncio
-async def test_one_genre(make_get_request, es_write_data, es_delete_index, query_data, expected_answer, aioredis_pool):
+async def test_one_genre(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping)
     response = await make_get_request('/api/v1/genres/' + query_data['id'], query_data)
     body = await response.json()
