@@ -69,6 +69,8 @@ class BaseService:
 
     async def _get_object_from_elastic(self, object_id: str) -> Model | None:
         doc = await self.elastic.get(self.index, object_id)
+        if not doc:
+            return
         return self.model(**doc['_source'])
 
     @cached(

@@ -4,7 +4,7 @@ import pytest
 from aiocache.serializers import PickleSerializer
 
 from tests.settings import test_settings
-from tests.testdata.genres_testdata.genre_model import Genre
+from tests.testdata.persons_testdata.person_model import Person
 
 
 @pytest.mark.parametrize(
@@ -26,21 +26,21 @@ from tests.testdata.genres_testdata.genre_model import Genre
     ]
 )
 @pytest.mark.asyncio
-async def test_genres(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
-    await es_write_data(test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping)
-    response = await make_get_request('/api/v1/genres', query_data)
+async def test_persons(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
+    await es_write_data(test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping)
+    response = await make_get_request('/api/v1/persons', query_data)
     body = await response.json()
     assert response.status == expected_answer['status']
     if response.status == HTTPStatus.OK:
         assert len(body['data']) <= expected_answer['length']
-    await es_delete_index(test_settings.genres_index)
+    await es_delete_index(test_settings.persons_index)
 
 
 @pytest.mark.parametrize(
     'query_data, expected_answer',
     [
         (
-                {'id': test_settings.genres_data[0]['uuid']},
+                {'id': test_settings.persons_data[0]['uuid']},
                 {'status': HTTPStatus.OK}
         ),
         (
@@ -50,33 +50,33 @@ async def test_genres(make_get_request, es_write_data, es_delete_index, query_da
     ]
 )
 @pytest.mark.asyncio
-async def test_one_genre(make_get_request, es_write_data, es_delete_index, query_data, expected_answer, aioredis_pool):
-    await es_write_data(test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping)
-    response = await make_get_request('/api/v1/genres/' + query_data['id'], query_data)
+async def test_one_person(make_get_request, es_write_data, es_delete_index, query_data, expected_answer, aioredis_pool):
+    await es_write_data(test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping)
+    response = await make_get_request('/api/v1/persons/' + query_data['id'], query_data)
     body = await response.json()
     assert response.status == expected_answer['status']
     if response.status == HTTPStatus.OK:
-        assert Genre(**body)
+        assert Person(**body)
 
-    await es_delete_index(test_settings.genres_index)
+    await es_delete_index(test_settings.persons_index)
 
 
 @pytest.mark.parametrize(
     'index, test_data, endpoint, query_data, expected_answer',
     [
         (
-                'genres',
-                (test_settings.genres_data, test_settings.genres_index, test_settings.genres_index_mapping),
-                '/api/v1/genres',
+                'persons',
+                (test_settings.persons_data, test_settings.persons_index, test_settings.persons_index_mapping),
+                '/api/v1/persons',
                 {'page_number': 1, 'page_size': 20},
-                {'status': HTTPStatus.OK, 'cache_key': "main:get_list:genres:1:20:uuid:asc"}
+                {'status': HTTPStatus.OK, 'cache_key': "main:get_list:persons:1:20:uuid:asc"}
         ),
 
     ]
 )
 @pytest.mark.asyncio
-async def test_genre_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data,
-                           endpoint, query_data, expected_answer):
+async def test_person_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data,
+                            endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
     response = await make_get_request(endpoint, query_data)
     body = await response.json()

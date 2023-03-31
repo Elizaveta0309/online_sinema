@@ -1,10 +1,10 @@
-import json
 from typing import List
-import aioredis
 
+import aioredis
 import pytest
 from aiohttp import ClientSession
 from elasticsearch import AsyncElasticsearch, RequestError
+from elasticsearch.helpers import async_bulk
 
 from tests.settings import test_settings
 
@@ -36,22 +36,21 @@ def es_write_data(es_client):
     async def inner(data: List[dict], index: str, mapping: dict):
         bulk_query = []
         for row in data:
-            bulk_query.extend([
-                json.dumps({'index': {'_index': index, '_id': row[test_settings.es_id_field]}}),
-                json.dumps(row)
-            ])
+            bulk_query.append(
+                {
+                    '_index': index,
+                    '_id': row['uuid'],
+                    '_source': row
+                }
+            )
 
-        str_query = '\n'.join(bulk_query) + '\n'
         try:
             await es_client.indices.create(index=index, body=mapping)
         except RequestError as e:
             if e.error != 'resource_already_exists_exception':
                 raise e
 
-        response = await es_client.bulk(str_query, refresh=True)
-
-        if response['errors']:
-            raise Exception('Ошибка записи данных в Elasticsearch')
+        await async_bulk(es_client, actions=bulk_query)
 
     return inner
 
@@ -60,6 +59,7 @@ def es_write_data(es_client):
 def es_delete_index(es_client):
     async def inner(index):
         await es_client.indices.delete(index=index, ignore=[400, 404])
+
     return inner
 
 
@@ -69,4 +69,5 @@ def make_get_request(client_session):
         url = test_settings.service_url + endpoint
         response = await client_session.get(url, params=query_data)
         return response
+
     return inner
