@@ -50,7 +50,7 @@ def es_write_data(es_client):
             if e.error != 'resource_already_exists_exception':
                 raise e
 
-        await async_bulk(es_client, actions=bulk_query)
+        await async_bulk(es_client, actions=bulk_query, refresh='wait_for')
 
     return inner
 
