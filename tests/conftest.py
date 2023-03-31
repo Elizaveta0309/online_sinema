@@ -51,7 +51,6 @@ def es_write_data(es_client):
                 raise e
 
         await async_bulk(es_client, actions=bulk_query)
-        return bulk_query
 
     return inner
 

@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 import pytest
 from aiocache.serializers import PickleSerializer
-
 from tests.settings import test_settings
 from tests.testdata.movies_testdata.movie_model import Movie
 
@@ -50,8 +49,7 @@ async def test_films(make_get_request, es_write_data, es_delete_index, query_dat
 )
 @pytest.mark.asyncio
 async def test_one_film(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
-    queries = await es_write_data(test_settings.movies_data, test_settings.movies_index,
-                                  test_settings.movies_index_mapping)
+    await es_write_data(test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping)
     response = await make_get_request(f'/api/v1/films/{query_data["id"]}/')
     body = await response.json()
     assert response.status == expected_answer['status']
