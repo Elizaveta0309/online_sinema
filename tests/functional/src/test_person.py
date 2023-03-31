@@ -44,7 +44,7 @@ async def test_persons(make_get_request, es_write_data, es_delete_index, query_d
                 {'status': HTTPStatus.OK}
         ),
         (
-                {'id': 'this_id_doesnt_exists'},
+                {'id': 'this_id_doesnt_exist'},
                 {'status': HTTPStatus.NOT_FOUND}
         ),
     ]

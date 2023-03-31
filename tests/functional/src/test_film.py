@@ -42,7 +42,7 @@ async def test_films(make_get_request, es_write_data, es_delete_index, query_dat
                 {'status': HTTPStatus.OK}
         ),
         (
-                {'id': 'this_id_doesnt_exists'},
+                {'id': 'this_id_doesnt_exist'},
                 {'status': HTTPStatus.NOT_FOUND}
         ),
     ]
