@@ -13,8 +13,8 @@ from src.models.film import Model
 
 
 class BaseService:
-    def __init__(self, elastic: AsyncElasticsearchStorage, search_field: str):
-        self.elastic = elastic
+    def __init__(self, storage: AsyncElasticsearchStorage, search_field: str):
+        self.storage = storage
         self.search_field = search_field
         self.model = None
         self.index = None
@@ -28,7 +28,7 @@ class BaseService:
     async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
         try:
-            data = await self.elastic.search(
+            data = await self.storage.search(
                 index=self.index,
                 body={
                     'from': from_,
@@ -68,7 +68,7 @@ class BaseService:
         return obj or None
 
     async def _get_object_from_elastic(self, object_id: str) -> Model | None:
-        doc = await self.elastic.get(self.index, object_id)
+        doc = await self.storage.get(self.index, object_id)
         if not doc:
             return
         return self.model(**doc['_source'])
@@ -83,7 +83,7 @@ class BaseService:
         from_ = (params.page_number - 1) * params.page_size
 
         try:
-            data = await self.elastic.search(
+            data = await self.storage.search(
                 index=self.index,
                 body={
                     'from': from_,
