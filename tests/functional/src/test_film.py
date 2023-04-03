@@ -7,6 +7,9 @@ from tests.settings import test_settings
 from tests.testdata.movies_testdata.movie_model import Movie
 
 
+pytestmark = pytest.mark.asyncio
+
+
 @pytest.mark.parametrize(
     'query_data, expected_answer',
     [
@@ -24,7 +27,6 @@ from tests.testdata.movies_testdata.movie_model import Movie
         ),
     ]
 )
-@pytest.mark.asyncio
 async def test_films(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping)
     response = await make_get_request('/api/v1/films', query_data)
@@ -48,7 +50,6 @@ async def test_films(make_get_request, es_write_data, es_delete_index, query_dat
         ),
     ]
 )
-@pytest.mark.asyncio
 async def test_one_film(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping)
     response = await make_get_request(f'/api/v1/films/{query_data["id"]}/')
@@ -71,7 +72,6 @@ async def test_one_film(make_get_request, es_write_data, es_delete_index, query_
         ),
     ]
 )
-@pytest.mark.asyncio
 async def test_film_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data,
                           endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
