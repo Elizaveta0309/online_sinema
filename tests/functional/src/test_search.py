@@ -5,6 +5,9 @@ from tests.settings import test_settings
 from http import HTTPStatus
 
 
+pytestmark = pytest.mark.asyncio
+
+
 @pytest.mark.parametrize(
         'index, test_data, endpoint, query_data, expected_answer',
         [
@@ -52,7 +55,6 @@ from http import HTTPStatus
             )
         ]
 )
-@pytest.mark.asyncio
 async def test_search_endpoints(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
     await aioredis_pool.flushall()
@@ -92,7 +94,6 @@ async def test_search_endpoints(es_write_data, es_delete_index, make_get_request
             )
         ]
 )
-@pytest.mark.asyncio
 async def test_search_pagination(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
     await aioredis_pool.flushall()
@@ -135,7 +136,6 @@ async def test_search_pagination(es_write_data, es_delete_index, make_get_reques
             )
         ]
 )
-@pytest.mark.asyncio
 async def test_search_cache(es_write_data, es_delete_index, make_get_request, aioredis_pool, index, test_data, endpoint, query_data, expected_answer):
     await es_write_data(*test_data)
     await aioredis_pool.flushall()
