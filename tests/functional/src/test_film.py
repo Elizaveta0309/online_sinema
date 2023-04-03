@@ -29,11 +29,15 @@ pytestmark = pytest.mark.asyncio
 )
 async def test_films(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping)
+
     response = await make_get_request('/api/v1/films', query_data)
     body = await response.json()
+
     assert response.status == expected_answer['status']
+
     if response.status == HTTPStatus.OK:
         assert len(body['data']) <= expected_answer['length']
+
     await es_delete_index(test_settings.movies_index)
 
 
@@ -52,11 +56,15 @@ async def test_films(make_get_request, es_write_data, es_delete_index, query_dat
 )
 async def test_one_film(make_get_request, es_write_data, es_delete_index, query_data, expected_answer):
     await es_write_data(test_settings.movies_data, test_settings.movies_index, test_settings.movies_index_mapping)
+
     response = await make_get_request(f'/api/v1/films/{query_data["id"]}/')
     body = await response.json()
+
     assert response.status == expected_answer['status']
+
     if response.status == HTTPStatus.OK:
         assert Movie(**body)
+
     await es_delete_index(test_settings.movies_index)
 
 
