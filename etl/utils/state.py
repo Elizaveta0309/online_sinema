@@ -1,39 +1,39 @@
-import abc
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 
 import redis
-
 from utils.backoff import backoff
 
 
-class BaseStorage:
-    @abc.abstractmethod
+class BaseStorage(ABC):
+    @abstractmethod
     def save_state(self, state: dict) -> None:
         """Сохранить состояние в постоянное хранилище"""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def retrieve_state(self) -> dict:
         """Загрузить состояние локально из постоянного хранилища"""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def add_to_list(self, list_name: str, value) -> None:
         """Добавить в список значение. Если список не существует, создать."""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def clear_list(self, list_name: str) -> None:
         """Очистить список"""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_list(self, list_name: str) -> list[str]:
         """Получить содержимое списка"""
         pass
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abstractmethod
     def remove(self, list_name: str, id: str) -> None:
         """Удалить значение из списка"""
         pass
