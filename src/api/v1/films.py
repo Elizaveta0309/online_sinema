@@ -4,9 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.v1.query_params import SearchQueryParams, ListQueryParams
 from src.services.film import FilmService, get_film_service
-from .models.film import Film
 from .constants import FILM_NOT_FOUND_MESSAGE
-
+from .models.film import Film
 
 router = APIRouter()
 

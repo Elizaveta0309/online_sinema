@@ -27,20 +27,19 @@ class BaseService:
     )
     async def get_list(self, params: ListQueryParams):
         from_ = (params.page_number - 1) * params.page_size
-        try:
-            data = await self.storage.search(
-                index=self.index,
-                body={
-                    'from': from_,
-                    'size': params.page_size,
-                    'query': {
-                        'match_all': {}
-                    }
-                },
-                sort=f'{params.sort}:{params.asc}',
-            )
-        except elasticsearch.exceptions.ConnectionError as e:
-            logging.error(str(e))
+        data = await self.storage.search(
+            index=self.index,
+            body={
+                'from': from_,
+                'size': params.page_size,
+                'query': {
+                    'match_all': {}
+                }
+            },
+            sort=f'{params.sort}:{params.asc}',
+        )
+
+        if not data:
             return {'error': 'resource unreachable'}
 
         total_pages = math.ceil(data['hits']['total']['value'] / params.page_size)
@@ -59,13 +58,7 @@ class BaseService:
         key_builder=build_cache_key
     )
     async def get_by_id(self, object_id: str) -> Model | None:
-        try:
-            obj = await self._get_object_from_elastic(object_id)
-        except elasticsearch.exceptions.ConnectionError as e:
-            logging.error(str(e))
-            return {'error': 'resource unreachable'}
-
-        return obj or None
+        return await self._get_object_from_elastic(object_id) or None
 
     async def _get_object_from_elastic(self, object_id: str) -> Model | None:
         doc = await self.storage.get(self.index, object_id)

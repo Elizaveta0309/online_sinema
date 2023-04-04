@@ -1,9 +1,12 @@
-import backoff
-from elasticsearch import AsyncElasticsearch, NotFoundError
-import elasticsearch
+import logging
 from logging import getLogger
-from src.db.storage import Storage
+
+import backoff
+import elasticsearch
+from elasticsearch import AsyncElasticsearch, NotFoundError
+
 from src.core.config import settings
+from src.db.storage import Storage
 
 es: AsyncElasticsearch | None = None
 
@@ -11,20 +14,18 @@ logger = getLogger()
 
 
 class AsyncElasticsearchStorage(Storage):
-    def __init__(self, client: AsyncElasticsearch) -> None:
-        super().__init__()
-        self.client = client
-
     @backoff.on_exception(backoff.expo,
                           elasticsearch.ConnectionError,
                           max_time=settings.STORAGE_BACKOFF_MAX_TIME,
                           factor=settings.BACKOFF_FACTOR,
                           raise_on_giveup=True)
-    async def get(self, index: str, id: str):
+    async def get(self, index: str, id_: str):
+
         try:
-            doc = await self.client.get(index=index, id=id)
-        except NotFoundError:
-            return None
+            doc = await self.client.get(index=index, id=id_)
+        except (NotFoundError, elasticsearch.exceptions.ConnectionError) as e:
+            logging.error(str(e))
+            return
 
         return doc
 
@@ -34,13 +35,11 @@ class AsyncElasticsearchStorage(Storage):
                           factor=settings.BACKOFF_FACTOR,
                           raise_on_giveup=True)
     async def search(self, index: str, body: dict, sort: str | None = None):
-        doc = await self.client.search(
-            index=index,
-            body=body,
-            sort=sort
-        )
-
-        return doc
+        try:
+            return await self.client.search(index=index, body=body, sort=sort)
+        except elasticsearch.exceptions.ConnectionError as e:
+            logging.error(str(e))
+            return
 
 
 # Функция понадобится при внедрении зависимостей
