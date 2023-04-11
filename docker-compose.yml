@@ -67,5 +67,28 @@ services:
     ports:
       - "80:80"
 
+  auth:
+    build: auth
+    container_name: auth
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./auth:/opt/app
+
+  postgres-auth:
+    image: postgres
+    container_name: postgres-auth
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5433"
+    command:
+      - -p 5433
+    restart: always
+    volumes:
+      - data:/var/lib/postgresql/data
+
 volumes:
   data:
