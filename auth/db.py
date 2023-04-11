@@ -1,4 +1,7 @@
+import time
+
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -6,6 +9,7 @@ from config import settings
 
 dsl = f'postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}' \
       f'@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/postgres'
+
 engine = create_engine(dsl)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -18,4 +22,9 @@ def init_db():
     # Здесь необходимо импортировать все модули с моделями, которые должны зарегистрироваться в ORM.
     # В противном случае их нужно импортировать до вызова init_db()
     # Это необходимо, чтобы sqlalchemy увидел все таблицы и при необходимости создал их.
-    Base.metadata.create_all(bind=engine)
+    while True:
+        try:
+            Base.metadata.create_all(bind=engine)
+            break
+        except OperationalError:
+            time.sleep(1)

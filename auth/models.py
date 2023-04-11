@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import timezone
 
 import jwt
@@ -12,16 +12,27 @@ from db import Base, db_session
 from utils.utils import encrypt_password
 
 
-class Role(Base):
-    __tablename__ = 'role'
+class Mixin:
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+
+    def save(self):
+        try:
+            db_session.add(self)
+            db_session.commit()
+        except (PendingRollbackError, DataError) as e:
+            db_session.rollback()
+            raise e
+
+
+class Role(Base, Mixin):
+    __tablename__ = 'role'
+
     title = Column(String, nullable=False)
 
 
-class User(Base):
+class User(Base, Mixin):
     __tablename__ = 'user'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     login = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     role = Column(ForeignKey('role.id'))
@@ -44,11 +55,21 @@ class User(Base):
 
     def generate_tokens(self):
         role = Role.query.filter_by(id=self.role).first().title
-        params = [
-            {'role': role, 'exp': datetime.now(timezone.utc)},
+        token_params = [
+            {'role': role, 'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.TOKEN_EXP)},
             settings.SECRET
         ]
-        return jwt.encode(*params), jwt.encode(*params)
+        refresh_params = [
+            {'role': role, 'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.REFRESH_EXP)},
+            settings.SECRET
+        ]
+        return jwt.encode(*token_params), jwt.encode(*refresh_params)
 
     def check_password(self, password):
         return encrypt_password(password) == self.password
+
+
+class RefreshToken(Base, Mixin):
+    __tablename__ = 'refresh_token'
+
+    token = Column(String, nullable=False, unique=True)
