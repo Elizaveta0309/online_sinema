@@ -45,14 +45,6 @@ class User(Base, Mixin):
     def __repr__(self):
         return f'<User {self.login}>'
 
-    def save(self):
-        try:
-            db_session.add(self)
-            db_session.commit()
-        except (PendingRollbackError, DataError) as e:
-            db_session.rollback()
-            raise e
-
     def generate_tokens(self):
         role = Role.query.filter_by(id=self.role).first().title
         token_params = [
