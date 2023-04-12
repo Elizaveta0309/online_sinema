@@ -118,8 +118,8 @@ class RoleView(MethodView):
         return jsonify({'info': 'ok'}), 200
 
 
-user_view = RoleView.as_view('role_api')
+role_view = RoleView.as_view('role_api')
 app.add_url_rule('/api/v1/roles/',
-                 view_func=user_view, methods=['GET', 'POST'])
+                 view_func=role_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/v1/roles/<role_id>',
-                 view_func=user_view, methods=['GET', 'PATCH', 'DELETE'])
+                 view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])

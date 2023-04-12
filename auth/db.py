@@ -10,9 +10,7 @@ from config import settings
 dsl = f'postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}' \
       f'@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/postgres'
 
-dsl_local = 'postgresql://postgres:postgres@localhost:5433/postgres'
-
-engine = create_engine(dsl_local)
+engine = create_engine(dsl)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
