@@ -2,18 +2,11 @@ from flask import Flask
 
 from db import init_db
 
+init_db()
 app = Flask(__name__)
 
-
-@app.route('/hello-world')
-def hello_world():
-    return 'Hello, World!'
-
-
-def main():
-    init_db()
-    app.run()
-
+# noinspection PyUnresolvedReferences
+from api.v1.views import *
 
 if __name__ == '__main__':
-    main()
+    init_db()
