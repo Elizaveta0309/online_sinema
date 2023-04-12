@@ -22,12 +22,19 @@ class Mixin:
             db_session.rollback()
             raise e
 
+    def delete(self):
+        self.__class__.query.filter_by(id=self.id).delete()
+        db_session.commit()
+
 
 class Role(Base, Mixin):
     DEFAULT_ROLE = 'user'
     __tablename__ = 'role'
 
-    title = Column(String, nullable=False)
+    title = Column(String, unique=True, nullable=False)
+
+    def __init__(self, title):
+        self.title = title
 
     def __repr__(self):
         return f'<Role {self.title}>'
@@ -75,6 +82,10 @@ class RefreshToken(Base, Mixin):
 
     token = Column(String, nullable=False, unique=True)
     user = Column(ForeignKey('user.id'))
+
+    def __init__(self, token, user):
+        self.token = token
+        self.user = user
 
     def __repr__(self):
         return f'<RefreshToken {self.id}>'
