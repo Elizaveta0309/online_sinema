@@ -65,3 +65,4 @@ class RefreshToken(Base, Mixin):
     __tablename__ = 'refresh_token'
 
     token = Column(String, nullable=False, unique=True)
+    user = Column(ForeignKey('user.id'))

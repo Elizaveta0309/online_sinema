@@ -22,6 +22,9 @@ def init_db():
     # Здесь необходимо импортировать все модули с моделями, которые должны зарегистрироваться в ORM.
     # В противном случае их нужно импортировать до вызова init_db()
     # Это необходимо, чтобы sqlalchemy увидел все таблицы и при необходимости создал их.
+
+    # noinspection PyUnresolvedReferences
+    from models import RefreshToken, Role, User
     while True:
         try:
             Base.metadata.create_all(bind=engine)
