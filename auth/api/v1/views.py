@@ -29,3 +29,22 @@ def login():
     response.set_cookie('refresh', refresh)
 
     return response, 200
+
+
+@app.route('/api/v1/sign_up', methods=['POST'])
+def sign_up():
+    login_ = request.json.get('login')
+    password = request.json.get('password')
+    if not (login_ and password):
+        return jsonify({'error': 'нужен логин и пароль'}), 401
+
+    user = User.query.filter_by(login=login_).first()
+    if user:
+        return jsonify({'error': 'user with the login already exists'}), 400
+
+    user = User(login_, password)
+    user.save()
+
+    response = jsonify({'info': 'user created'})
+
+    return response, 201
