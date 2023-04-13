@@ -18,6 +18,13 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
+def create_default_role():
+    from models import Role
+    if not Role.query.filter_by(title='user').first():
+        r = Role(title='user')
+        r.save()
+
+
 def init_db():
     # Здесь необходимо импортировать все модули с моделями, которые должны зарегистрироваться в ORM.
     # В противном случае их нужно импортировать до вызова init_db()
@@ -28,6 +35,7 @@ def init_db():
     while True:
         try:
             Base.metadata.create_all(bind=engine)
+            create_default_role()
             break
         except OperationalError:
             time.sleep(1)
