@@ -1,11 +1,13 @@
 from flask import request, jsonify
 from flask.views import MethodView
+import injector
 from sqlalchemy.exc import DataError
 
 from app import app
 from models import User, RefreshToken, Role
 from schemas import RoleSchema
 from utils.utils import jwt_decode, is_token_expired
+from utils.storage import Blacklist
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -60,6 +62,33 @@ def refresh():
     existing_refresh_token.delete()
 
     return response, 200
+
+
+@injector.inject
+@app.route('/api/v1/logout', methods=['POST'])
+def logout(blacklist: Blacklist):
+    access_token = request.cookies.get('token')
+    refresh_token = request.cookies.get('refresh')
+
+    if not refresh_token or access_token:
+        return jsonify({'error': 'token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+
+    user_id = jwt_decode(refresh_token).get('user_id')
+    user = User.query.filter_by(id=user_id).first()
+
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    RefreshToken.query.filter_by(user=user.id).delete()
+    blacklist.add_to_expired(access_token)
+
+    return (
+        jsonify({"info": "Access token revoked"}),
+        204
+    )
 
 
 class RoleView(MethodView):
