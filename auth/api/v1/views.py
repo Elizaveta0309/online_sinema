@@ -1,13 +1,15 @@
-from flask import request, jsonify
-from flask.views import MethodView
+import flask_injector
 import injector
-from sqlalchemy.exc import DataError
-
 from app import app
-from models import User, RefreshToken, Role
+from flask import jsonify, request
+from flask.views import MethodView
+from providers import BlacklistModule
 from schemas import RoleSchema
-from utils.utils import jwt_decode, is_token_expired
+from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
+from utils.utils import is_token_expired, jwt_decode
+
+from models import RefreshToken, Role, User
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -70,7 +72,7 @@ def logout(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
 
-    if not refresh_token or access_token:
+    if not refresh_token or not access_token:
         return jsonify({'error': 'token is not provided'}), 403
 
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
@@ -152,3 +154,9 @@ app.add_url_rule('/api/v1/roles/',
                  view_func=role_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/v1/roles/<role_id>',
                  view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])
+
+
+flask_injector.FlaskInjector(
+    app=app,
+    modules=[BlacklistModule()],
+)
