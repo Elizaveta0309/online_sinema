@@ -51,10 +51,16 @@ class User(Base, Mixin):
     password = Column(String, nullable=False)
     role = Column(ForeignKey('role.id'))
 
-    def __init__(self, login, password):
+    def __init__(self, login, password, role=None):
         self.login = login
         self.password = encrypt_password(password)
-        self.role = Role.get_default_role()
+
+        try:
+            role = Role.query.filter_by(title=role).first()
+        except DataError:
+            role = None
+
+        self.role = role.id if role else Role.get_default_role()
 
     def __repr__(self):
         return f'<User {self.login}>'
