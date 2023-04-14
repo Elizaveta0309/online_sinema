@@ -121,6 +121,30 @@ def logout(blacklist: Blacklist):
     )
 
 
+@app.route('/api/v1/history', methods=['POST'])
+def history(blacklist: Blacklist):
+    access_token = request.cookies.get('token')
+
+    if not access_token:
+        return jsonify({'error': 'access token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+
+    user_id = jwt_decode(access_token).get('user_id')
+    user = User.query.filter_by(id=user_id).first()
+
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    user_sessions = UserSession.query.filter_by(user=user.id).all()
+
+    return (
+        jsonify({"history": user_sessions}),
+        200
+    )
+
+
 class RoleView(MethodView):
     def get(self, role_id=None):
         if role_id:
