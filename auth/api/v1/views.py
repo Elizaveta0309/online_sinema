@@ -111,6 +111,10 @@ def logout(blacklist: Blacklist):
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
+    session = UserSession.query.filter_by(user=user.id).first()
+    session.isActive = False
+    session.save()
+
     return (
         jsonify({"info": "Access token revoked"}),
         204
