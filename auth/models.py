@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from datetime import timezone
 
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
@@ -95,3 +95,11 @@ class RefreshToken(Base, Mixin):
 
     def __repr__(self):
         return f'<RefreshToken {self.id}>'
+
+
+class UserSession(Base, Mixin):
+    __tablename__ = 'user_session'
+
+    user = Column(ForeignKey('user.id'))
+    isActive = Column(Boolean, nullable=False)
+    creation_date = Column(DateTime, nullable=False)
