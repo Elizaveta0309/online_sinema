@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from datetime import timezone
 
 import jwt
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
@@ -66,3 +66,11 @@ class RefreshToken(Base, Mixin):
 
     token = Column(String, nullable=False, unique=True)
     user = Column(ForeignKey('user.id'))
+
+
+class UserSession(Base, Mixin):
+    __tablename__ = 'user_session'
+
+    user = Column(ForeignKey('user.id'))
+    isActive = Column(Boolean, nullable=False)
+    creation_date = Column(DateTime, nullable=False)
