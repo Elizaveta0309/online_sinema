@@ -1,15 +1,15 @@
 import flask_injector
 import injector
-from app import app
 from flask import jsonify, request
 from flask.views import MethodView
+from sqlalchemy.exc import DataError
+
+from app import app
+from models import RefreshToken, Role, User
 from providers import BlacklistModule
 from schemas import RoleSchema
-from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode
-
-from models import RefreshToken, Role, User
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -39,7 +39,6 @@ def login():
     return response, 200
 
 
-
 @app.route('/api/v1/sign_up', methods=['POST'])
 def sign_up():
     login_ = request.json.get('login')
@@ -57,10 +56,11 @@ def sign_up():
     response = jsonify({'info': 'user created'})
 
     return response, 201
-  
+
+
 @app.route('/api/v1/refresh', methods=['POST'])
 def refresh():
-    refresh_token = request.cookies.get('refresh')
+    refresh_token = request.json.get('refresh')
 
     if not refresh_token:
         return jsonify({'error': 'no refresh token'}), 403
@@ -76,11 +76,11 @@ def refresh():
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
     token, refresh_token_new = user.generate_tokens()
-    response = jsonify({'info': 'ok'})
-    response.set_cookie('token', token)
-    response.set_cookie('refresh', refresh_token_new)
+    response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     existing_refresh_token.delete()
+    rt = RefreshToken(token=refresh_token_new, user=user.id)
+    rt.save()
 
     return response, 200
 
@@ -174,9 +174,7 @@ app.add_url_rule('/api/v1/roles/',
 app.add_url_rule('/api/v1/roles/<role_id>',
                  view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])
 
-
 flask_injector.FlaskInjector(
     app=app,
     modules=[BlacklistModule()],
 )
-

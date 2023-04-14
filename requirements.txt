@@ -26,3 +26,5 @@ urllib3==1.26.14
 uvicorn==0.12.2
 uvloop==0.17.0
 yarl==1.8.2
+PyJWT==2.6.0
+requests==2.28.2
