@@ -139,6 +139,9 @@ def history(blacklist: Blacklist):
 
     user_sessions = UserSession.query.filter_by(user=user.id).all()
 
+    if not user_sessions:
+        return jsonify({'error': 'no session found'}), 404
+
     return (
         jsonify({"history": user_sessions}),
         200
