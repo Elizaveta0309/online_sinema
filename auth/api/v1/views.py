@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import flask_injector
 import injector
 from app import app
@@ -9,7 +11,7 @@ from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode
 
-from models import RefreshToken, Role, User
+from models import RefreshToken, Role, User, UserSession
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -32,12 +34,14 @@ def login():
     refresh_token = RefreshToken(token=refresh, user=user.id)
     refresh_token.save()
 
+    session = UserSession(user=user.id, isActive=True, creation_date=datetime.now(timezone.utc))
+    session.save()
+
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
     response.set_cookie('refresh', refresh)
 
     return response, 200
-
 
 
 @app.route('/api/v1/sign_up', methods=['POST'])
@@ -57,7 +61,8 @@ def sign_up():
     response = jsonify({'info': 'user created'})
 
     return response, 201
-  
+
+
 @app.route('/api/v1/refresh', methods=['POST'])
 def refresh():
     refresh_token = request.cookies.get('refresh')
@@ -174,9 +179,7 @@ app.add_url_rule('/api/v1/roles/',
 app.add_url_rule('/api/v1/roles/<role_id>',
                  view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])
 
-
 flask_injector.FlaskInjector(
     app=app,
     modules=[BlacklistModule()],
 )
-
