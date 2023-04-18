@@ -6,7 +6,7 @@ from app import app
 from flask import jsonify, request
 from flask.views import MethodView
 from providers import BlacklistModule
-from schemas import RoleSchema
+from schemas import RoleSchema, AccountEntranceSchema
 from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode
@@ -34,8 +34,8 @@ def login():
     refresh_token = RefreshToken(token=refresh, user=user.id)
     refresh_token.save()
 
-    session = UserSession(user=user.id, isActive=True, creation_date=datetime.now(timezone.utc))
-    session.save()
+    entrance = AccountEntrance(user=user.id, entrance_date=datetime.now(timezone.utc))
+    entrance.save()
 
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
@@ -111,10 +111,6 @@ def logout(blacklist: Blacklist):
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
-    session = UserSession.query.filter_by(user=user.id).first()
-    session.isActive = False
-    session.save()
-
     return (
         jsonify({"info": "Access token revoked"}),
         204
@@ -137,13 +133,13 @@ def history(blacklist: Blacklist):
     if not user:
         return jsonify({'error': 'user not found'}), 404
 
-    user_sessions = UserSession.query.filter_by(user=user.id).all()
+    account_entrance = AccountEntrance.query.filter_by(user=user.id).first()
 
-    if not user_sessions:
+    if not account_entrance:
         return jsonify({'error': 'no session found'}), 404
 
     return (
-        jsonify({"history": user_sessions}),
+        jsonify({AccountEntranceSchema(many=True).dump(AccountEntrance.query.filter_by(user=user.id).all())}),
         200
     )
 
