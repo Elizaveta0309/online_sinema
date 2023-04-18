@@ -97,9 +97,15 @@ class RefreshToken(Base, Mixin):
         return f'<RefreshToken {self.id}>'
 
 
-class UserSession(Base, Mixin):
-    __tablename__ = 'user_session'
+class AccountEntrance(Base, Mixin):
+    __tablename__ = 'account_entrance'
+
+    def __init__(self, user, entrance_date):
+        self.user = user
+        self.entrance_date = entrance_date
+
+    def __repr__(self):
+        return f'<Entrance {self.entrance_date}>'
 
     user = Column(ForeignKey('user.id'))
-    isActive = Column(Boolean, nullable=False)
-    creation_date = Column(DateTime, nullable=False)
+    entrance_date = Column(DateTime, nullable=False)

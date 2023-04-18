@@ -11,7 +11,7 @@ from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode
 
-from models import RefreshToken, Role, User, UserSession
+from models import RefreshToken, Role, User, AccountEntrance
 
 
 @app.route('/api/v1/login', methods=['POST'])
