@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     GENRES_SEARCH_FIELD = 'name'
     STORAGE_BACKOFF_MAX_TIME = 5
     BACKOFF_FACTOR = 2
+    SECRET = '4b54ed6943c2'
+    AUTH_API_URL: str = 'http://auth:5000/api/v1'
 
     class Config:
         env_file = '.env'

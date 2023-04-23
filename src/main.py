@@ -1,4 +1,3 @@
-import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -14,6 +13,7 @@ app = FastAPI(
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
+    debug=True
 )
 
 
@@ -38,6 +38,3 @@ app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])
 # Если база postgres пустая, заполняем данными.
 if not check_bd_exists():
     create_db()
-
-if __name__ == '__main__':
-    uvicorn.run("main:app", host='0.0.0.0', port=8000, reload=True)

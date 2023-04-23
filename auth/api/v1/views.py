@@ -1,15 +1,20 @@
+from datetime import datetime, timezone
+
 import flask_injector
 import injector
-from app import app
 from flask import jsonify, request
 from flask.views import MethodView
+from sqlalchemy.exc import DataError
+
+from app import app
 from providers import BlacklistModule
-from schemas import RoleSchema
+from schemas import RoleSchema, AccountEntranceSchema
 from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
-from utils.utils import is_token_expired, jwt_decode, encrypt_password
 
-from models import RefreshToken, Role, User
+from utils.utils import is_token_expired, jwt_decode, encrypt_password
+from models import RefreshToken, Role, User, AccountEntrance
+
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -32,12 +37,14 @@ def login():
     refresh_token = RefreshToken(token=refresh, user=user.id)
     refresh_token.save()
 
+    entrance = AccountEntrance(user=user.id, entrance_date=datetime.now(timezone.utc))
+    entrance.save()
+
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
     response.set_cookie('refresh', refresh)
 
     return response, 200
-
 
 
 @app.route('/api/v1/sign_up', methods=['POST'])
@@ -57,10 +64,11 @@ def sign_up():
     response = jsonify({'info': 'user created'})
 
     return response, 201
-  
+
+
 @app.route('/api/v1/refresh', methods=['POST'])
 def refresh():
-    refresh_token = request.cookies.get('refresh')
+    refresh_token = request.json.get('refresh')
 
     if not refresh_token:
         return jsonify({'error': 'no refresh token'}), 403
@@ -76,11 +84,11 @@ def refresh():
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
     token, refresh_token_new = user.generate_tokens()
-    response = jsonify({'info': 'ok'})
-    response.set_cookie('token', token)
-    response.set_cookie('refresh', refresh_token_new)
+    response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     existing_refresh_token.delete()
+    rt = RefreshToken(token=refresh_token_new, user=user.id)
+    rt.save()
 
     return response, 200
 
@@ -122,16 +130,16 @@ def update_password(blacklist: Blacklist):
 
     if not refresh_token or not access_token:
         return jsonify({'error': 'token is not provided'}), 403
-
+        
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
-
+    
     user_id = jwt_decode(refresh_token).get('user_id')
     user: User = User.query.filter_by(id=user_id).first()
-
+    
     if not user:
         return jsonify({'error': 'user not found'}), 404
-
+    
     if not user.check_password(old_password):
         return jsonify({'error': 'wrong password'}), 400
 
@@ -145,6 +153,33 @@ def update_password(blacklist: Blacklist):
     blacklist.add_to_expired(access_token)
 
     return jsonify({'info': 'password refreshed'}), 200
+    
+
+@app.route('/api/v1/history', methods=['POST'])
+def history(blacklist: Blacklist):
+    access_token = request.cookies.get('token')
+
+    if not access_token:
+        return jsonify({'error': 'access token is not provided'}), 403
+        
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+        
+    user_id = jwt_decode(access_token).get('user_id')
+    user = User.query.filter_by(id=user_id).first()
+     
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    account_entrance = AccountEntrance.query.filter_by(user=user.id).first()
+
+    if not account_entrance:
+        return jsonify({'error': 'no session found'}), 404
+
+    return (
+        jsonify({AccountEntranceSchema(many=True).dump(AccountEntrance.query.filter_by(user=user.id).all())}),
+        200
+    )
 
 
 class RoleView(MethodView):
@@ -208,7 +243,6 @@ app.add_url_rule('/api/v1/roles/',
                  view_func=role_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/v1/roles/<role_id>',
                  view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])
-
 
 flask_injector.FlaskInjector(
     app=app,

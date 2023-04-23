@@ -31,7 +31,7 @@ def init_db():
     # Это необходимо, чтобы sqlalchemy увидел все таблицы и при необходимости создал их.
 
     # noinspection PyUnresolvedReferences
-    from models import RefreshToken, Role, User
+    from models import RefreshToken, Role, User, AccountEntrance
     while True:
         try:
             Base.metadata.create_all(bind=engine)
