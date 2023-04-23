@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from datetime import timezone
 
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
@@ -96,3 +96,17 @@ class RefreshToken(Base, Mixin):
 
     def __repr__(self):
         return f'<RefreshToken {self.id}>'
+
+
+class AccountEntrance(Base, Mixin):
+    __tablename__ = 'account_entrance'
+
+    def __init__(self, user, entrance_date):
+        self.user = user
+        self.entrance_date = entrance_date
+
+    def __repr__(self):
+        return f'<Entrance {self.entrance_date}>'
+
+    user = Column(ForeignKey('user.id'))
+    entrance_date = Column(DateTime, nullable=False)
