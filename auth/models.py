@@ -31,7 +31,7 @@ class Role(Base, Mixin):
     DEFAULT_ROLE = 'user'
     __tablename__ = 'role'
 
-    title = Column(String, unique=True, nullable=False)
+    title = Column(String(50), unique=True, nullable=False)
 
     def __init__(self, title):
         self.title = title
@@ -47,8 +47,8 @@ class Role(Base, Mixin):
 class User(Base, Mixin):
     __tablename__ = 'user'
 
-    login = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
+    login = Column(String(50), unique=True, nullable=False)
+    password = Column(String(30), nullable=False)
     role = Column(ForeignKey('role.id'))
 
     def __init__(self, login, password, role=None):
@@ -87,7 +87,7 @@ class User(Base, Mixin):
 class RefreshToken(Base, Mixin):
     __tablename__ = 'refresh_token'
 
-    token = Column(String, nullable=False, unique=True)
+    token = Column(String(200), nullable=False, unique=True)
     user = Column(ForeignKey('user.id'))
 
     def __init__(self, token, user):
@@ -108,5 +108,5 @@ class AccountEntrance(Base, Mixin):
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
 
-    user = Column(ForeignKey('user.id'))
+    user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
     entrance_date = Column(DateTime, nullable=False)
