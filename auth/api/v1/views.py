@@ -11,8 +11,10 @@ from providers import BlacklistModule
 from schemas import RoleSchema, AccountEntranceSchema
 from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
-from utils.utils import is_token_expired, jwt_decode
+
+from utils.utils import is_token_expired, jwt_decode, encrypt_password
 from models import RefreshToken, Role, User, AccountEntrance
+
 
 
 @app.route('/api/v1/login', methods=['POST'])
@@ -118,19 +120,54 @@ def logout(blacklist: Blacklist):
     )
 
 
+@injector.inject
+@app.route('/api/v1/update_password', methods=['POST'])
+def update_password(blacklist: Blacklist):
+    access_token = request.cookies.get('token')
+    refresh_token = request.cookies.get('refresh')
+    old_password = request.json.get('old_password')
+    new_password = request.json.get('new_password')
+
+    if not refresh_token or not access_token:
+        return jsonify({'error': 'token is not provided'}), 403
+        
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+    
+    user_id = jwt_decode(refresh_token).get('user_id')
+    user: User = User.query.filter_by(id=user_id).first()
+    
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+    
+    if not user.check_password(old_password):
+        return jsonify({'error': 'wrong password'}), 400
+
+    if user.check_password(new_password):
+        return {'error': 'new password should be different'}, 400
+
+    user.password = encrypt_password(new_password)
+    user.save()
+
+    RefreshToken.query.filter_by(user=user.id).delete()
+    blacklist.add_to_expired(access_token)
+
+    return jsonify({'info': 'password refreshed'}), 200
+    
+
 @app.route('/api/v1/history', methods=['POST'])
 def history(blacklist: Blacklist):
     access_token = request.cookies.get('token')
 
     if not access_token:
         return jsonify({'error': 'access token is not provided'}), 403
-
+        
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
-
+        
     user_id = jwt_decode(access_token).get('user_id')
     user = User.query.filter_by(id=user_id).first()
-
+     
     if not user:
         return jsonify({'error': 'user not found'}), 404
 
