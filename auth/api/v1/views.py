@@ -2,15 +2,16 @@ from datetime import datetime, timezone
 
 import flask_injector
 import injector
-from app import app
 from flask import jsonify, request
 from flask.views import MethodView
+from sqlalchemy.exc import DataError
+
+from app import app
 from providers import BlacklistModule
 from schemas import RoleSchema, AccountEntranceSchema
 from sqlalchemy.exc import DataError
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode
-
 from models import RefreshToken, Role, User, AccountEntrance
 
 
@@ -65,7 +66,7 @@ def sign_up():
 
 @app.route('/api/v1/refresh', methods=['POST'])
 def refresh():
-    refresh_token = request.cookies.get('refresh')
+    refresh_token = request.json.get('refresh')
 
     if not refresh_token:
         return jsonify({'error': 'no refresh token'}), 403
@@ -81,11 +82,11 @@ def refresh():
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
     token, refresh_token_new = user.generate_tokens()
-    response = jsonify({'info': 'ok'})
-    response.set_cookie('token', token)
-    response.set_cookie('refresh', refresh_token_new)
+    response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     existing_refresh_token.delete()
+    rt = RefreshToken(token=refresh_token_new, user=user.id)
+    rt.save()
 
     return response, 200
 
