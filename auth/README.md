@@ -1,4 +1,20 @@
+# Auth
+
+После установки войти в контейнер
+
+```
+docker exec -it auth bash
+```
+
+Запустить создание таблиц базы данных
+
+```
+alembic revision --autogenerate
+alembic upgrade head
+```
+
 ### Создание суперпользователя:
+
 
 Войти в контейнер auth
 
