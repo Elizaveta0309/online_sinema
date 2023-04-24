@@ -161,23 +161,37 @@ def history(blacklist: Blacklist):
 
     if not access_token:
         return jsonify({'error': 'access token is not provided'}), 403
-        
+
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
-        
+
     user_id = jwt_decode(access_token).get('user_id')
     user = User.query.filter_by(id=user_id).first()
-     
+
     if not user:
         return jsonify({'error': 'user not found'}), 404
 
-    account_entrance = AccountEntrance.query.filter_by(user=user.id).first()
+    account_entrances = AccountEntrance.query.filter_by(user=user.id)
+    total_entries = account_entrances.count()
 
-    if not account_entrance:
-        return jsonify({'error': 'no session found'}), 404
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    offset = (page - 1) * per_page
+    limit = per_page
+
+    account_entrances = account_entrances.offset(offset).limit(limit)
+
+    if not account_entrances:
+        return jsonify({'error': 'no sessions found'}), 404
 
     return (
-        jsonify({AccountEntranceSchema(many=True).dump(AccountEntrance.query.filter_by(user=user.id).all())}),
+        jsonify({
+            'data': AccountEntranceSchema(many=True).dump(account_entrances),
+            'total_entries': total_entries,
+            'page': page,
+            'per_page': per_page
+        }),
         200
     )
 

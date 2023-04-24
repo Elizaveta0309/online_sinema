@@ -70,8 +70,7 @@ class User(Base, Mixin):
         token_data = {
             'user_id': str(self.id),
             'role': role,
-            # 'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.TOKEN_EXP)
-            'exp': datetime.now(timezone.utc) + timedelta(seconds=1)
+            'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.TOKEN_EXP)
         }
         refresh_data = {
             'user_id': str(self.id),
