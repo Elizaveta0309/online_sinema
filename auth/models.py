@@ -41,6 +41,9 @@ class Role(Base, Mixin):
 
     @classmethod
     def get_default_role(cls):
+        if not Role.query.filter_by(title='user').first():
+            r = Role(title='user')
+            r.save()
         return cls.query.filter_by(title=cls.DEFAULT_ROLE).first().id
 
 
