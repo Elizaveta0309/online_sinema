@@ -1,6 +1,9 @@
 from flask import Flask
 
+from middleware import ExceptionHandlerMiddleware
+
 app = Flask(__name__)
+app.wsgi_app = ExceptionHandlerMiddleware(app.wsgi_app)
 
 # noinspection PyUnresolvedReferences
 from api.v1.views import *

@@ -2,6 +2,7 @@ import flask
 import flask_injector
 import injector
 from config import settings
+from services import LoginRequest
 from utils.storage import Blacklist, RedisStorage
 
 
@@ -20,3 +21,16 @@ class BlacklistModule(injector.Module):
         )
 
         return Blacklist(storage)
+
+
+class LoginRequestModule(injector.Module):
+    def configure(self, binder):
+        binder.bind(
+            LoginRequest,
+            to=self.create,
+            scope=flask_injector.request
+        )
+
+    @staticmethod
+    def create():
+        return LoginRequest()

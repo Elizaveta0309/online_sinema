@@ -7,28 +7,25 @@ from flask.views import MethodView
 from sqlalchemy.exc import DataError
 
 from app import app
-from providers import BlacklistModule
+from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from sqlalchemy.exc import DataError
+
+from services import LoginRequest
 from utils.storage import Blacklist
 
 from utils.utils import is_token_expired, jwt_decode, encrypt_password
 from models import RefreshToken, Role, User, AccountEntrance
 
 
-
+@injector.inject
 @app.route('/api/v1/login', methods=['POST'])
-def login():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
-
-    user = User.query.filter_by(login=login_).first()
+def login(login_request: LoginRequest):
+    user = login_request.user
     if not user:
         return jsonify({'error': 'not found'}), 404
 
-    if not user.check_password(password):
+    if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
 
     RefreshToken.query.filter_by(user=user.id).delete()
@@ -47,18 +44,15 @@ def login():
     return response, 200
 
 
+@injector.inject
 @app.route('/api/v1/sign_up', methods=['POST'])
-def sign_up():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
+def sign_up(login_request: LoginRequest):
+    user = login_request.user
 
-    user = User.query.filter_by(login=login_).first()
     if user:
         return jsonify({'error': 'user with the login already exists'}), 400
 
-    user = User(login_, password)
+    user = User(login_request.user, login_request.password)
     user.save()
 
     response = jsonify({'info': 'user created'})
@@ -130,16 +124,16 @@ def update_password(blacklist: Blacklist):
 
     if not refresh_token or not access_token:
         return jsonify({'error': 'token is not provided'}), 403
-        
+
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
-    
+
     user_id = jwt_decode(refresh_token).get('user_id')
     user: User = User.query.filter_by(id=user_id).first()
-    
+
     if not user:
         return jsonify({'error': 'user not found'}), 404
-    
+
     if not user.check_password(old_password):
         return jsonify({'error': 'wrong password'}), 400
 
@@ -153,7 +147,7 @@ def update_password(blacklist: Blacklist):
     blacklist.add_to_expired(access_token)
 
     return jsonify({'info': 'password refreshed'}), 200
-    
+
 
 @app.route('/api/v1/history', methods=['POST'])
 def history(blacklist: Blacklist):
@@ -260,5 +254,8 @@ app.add_url_rule('/api/v1/roles/<role_id>',
 
 flask_injector.FlaskInjector(
     app=app,
-    modules=[BlacklistModule()],
+    modules=[
+        BlacklistModule(),
+        LoginRequestModule()
+    ],
 )
