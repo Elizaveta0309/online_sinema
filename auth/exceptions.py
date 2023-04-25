@@ -1,3 +1,6 @@
 class NoCredsException(Exception):
-    def __init__(self):
-        return
+    ...
+
+
+class Http404(Exception):
+    ...

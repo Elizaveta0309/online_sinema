@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 import flask_injector
 import injector
 from flask import jsonify, request
@@ -7,15 +5,12 @@ from flask.views import MethodView
 from sqlalchemy.exc import DataError
 
 from app import app
+from models import RefreshToken, Role, User, AccountEntrance
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
-from sqlalchemy.exc import DataError
-
 from services import LoginRequest
 from utils.storage import Blacklist
-
-from utils.utils import is_token_expired, jwt_decode, encrypt_password
-from models import RefreshToken, Role, User, AccountEntrance
+from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
 
 @injector.inject
@@ -28,14 +23,9 @@ def login(login_request: LoginRequest):
     if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
 
-    RefreshToken.query.filter_by(user=user.id).delete()
+    token, refresh = user.update_tokens()
 
-    token, refresh = user.generate_tokens()
-    refresh_token = RefreshToken(token=refresh, user=user.id)
-    refresh_token.save()
-
-    entrance = AccountEntrance(user=user.id, entrance_date=datetime.now(timezone.utc))
-    entrance.save()
+    user.create_account_entrance()
 
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
@@ -52,11 +42,8 @@ def sign_up(login_request: LoginRequest):
     if user:
         return jsonify({'error': 'user with the login already exists'}), 400
 
-    user = User(login_request.user, login_request.password)
-    user.save()
-
+    User.create(login_request.user, login_request.password)
     response = jsonify({'info': 'user created'})
-
     return response, 201
 
 
@@ -68,21 +55,14 @@ def refresh():
         return jsonify({'error': 'no refresh token'}), 403
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+    user = get_object_or_404(User, id=user_id)
 
     existing_refresh_token = RefreshToken.query.filter_by(token=refresh_token).first()
     if not existing_refresh_token or is_token_expired(refresh_token):
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
-    token, refresh_token_new = user.generate_tokens()
+    token, refresh_token_new = user.update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
-
-    existing_refresh_token.delete()
-    rt = RefreshToken(token=refresh_token_new, user=user.id)
-    rt.save()
 
     return response, 200
 
@@ -100,7 +80,7 @@ def logout(blacklist: Blacklist):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
+    user = get_object_or_404(User, id=user_id)
 
     if not user:
         return jsonify({'error': 'user not found'}), 404
@@ -193,16 +173,8 @@ def history(blacklist: Blacklist):
 class RoleView(MethodView):
     def get(self, role_id=None):
         if role_id:
-            try:
-                role = Role.query.filter_by(id=role_id).first()
-            except DataError:
-                role = None
-
-            if not role:
-                return jsonify({'error': 'not found'}), 404
-
+            role = get_object_or_404(Role, id=role_id)
             return jsonify(RoleSchema().dump(role))
-
         return jsonify(RoleSchema(many=True).dump(Role.query.all()))
 
     def post(self):
@@ -210,8 +182,7 @@ class RoleView(MethodView):
         if Role.query.filter_by(title=title).first():
             return jsonify({'error': 'role already exists'}), 409
 
-        r = Role(title)
-        r.save()
+        Role.create(title)
 
         return jsonify({'id': str(r.id)}), 201
 
@@ -227,9 +198,7 @@ class RoleView(MethodView):
         if not title:
             return jsonify({'error': "title wasn't provided"})
 
-        role.title = title
-        role.save()
-
+        Role.create(title)
         return jsonify({'info': 'ok'}), 200
 
     def delete(self, role_id):
