@@ -1,0 +1,38 @@
+parameters:
+  - name: access_token
+    in: cookie
+    description: User's access token
+    required: true
+    type: string
+  - name: page
+    in: query
+    description: Page number
+    required: false
+    type: integer
+  - name: per_page
+    in: query
+    description: Number of items per page
+    required: false
+    type: integer
+responses:
+ 200:
+   description: History of the account entrances
+   schema:
+     total_entries:
+       type: integer
+       description: Total count of the account entrances
+     page:
+       type: integer
+       description: Number of a page
+     per_page:
+       type: integer
+       description: Count of item per page
+     data:
+       type: array
+       description: Array of items
+ 400:
+   description: Token is already blacklisted or expired
+ 403:
+   description: Token is not provided
+ 404:
+   description: No entrance found

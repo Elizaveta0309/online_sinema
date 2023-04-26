@@ -1,0 +1,62 @@
+parameters:
+  - name: user_data
+    in: body
+    description: User's login and password
+    required: true
+    schema:
+      $ref: "#/definitions/UserData"
+responses:
+ 200:
+   description: User is logged in
+   schema:
+     $ref: "#/definitions/SuccessInfo"
+ 400:
+   description: Not found
+ 401:
+   description: Login and password required
+ 403:
+   description: Wrong password
+definitions:
+ SuccessInfo:
+   type: object
+   properties:
+     info:
+       type: string
+       description: some info about success
+       example: Success!
+ UserData:
+   properties:
+     login:
+       type: string
+       description: User's login
+     password:
+       type: string
+       description: User's password
+ Passwords:
+   properties:
+     new_password:
+       type: string
+       description: User's new password
+     old_password:
+       type: string
+       description: User's old password
+ Role:
+   properties:
+     title:
+       type: string
+       description: User's role
+       example: Admin
+ RoleID:
+   properties:
+     role_id:
+       description: Id of the role
+       type: string
+       example: 2322knndkd8ghk
+
+
+
+
+
+
+
+
