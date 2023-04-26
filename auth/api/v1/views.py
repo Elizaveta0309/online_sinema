@@ -1,8 +1,11 @@
+from datetime import datetime, timezone
+from functools import wraps
+from http import HTTPStatus
+
 import flask_injector
 import injector
 from flask import jsonify, request
 from flask.views import MethodView
-from sqlalchemy.exc import DataError
 
 from app import app
 from models import RefreshToken, Role, User, AccountEntrance
@@ -10,6 +13,10 @@ from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
 from utils.storage import Blacklist
+
+from utils.utils import is_token_expired, jwt_decode, encrypt_password
+from models import RefreshToken, Role, User, AccountEntrance
+from permissions import jwt_required, admin_required
 from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
 
@@ -69,15 +76,10 @@ def refresh():
 
 @injector.inject
 @app.route('/api/v1/logout', methods=['POST'])
+@jwt_required
 def logout(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
-
-    if not refresh_token or not access_token:
-        return jsonify({'error': 'token is not provided'}), 403
-
-    if blacklist.is_expired(access_token) or is_token_expired(access_token):
-        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user = get_object_or_404(User, id=user_id)
@@ -96,6 +98,7 @@ def logout(blacklist: Blacklist):
 
 @injector.inject
 @app.route('/api/v1/update_password', methods=['POST'])
+@jwt_required
 def update_password(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
@@ -130,14 +133,9 @@ def update_password(blacklist: Blacklist):
 
 
 @app.route('/api/v1/history', methods=['POST'])
+@jwt_required
 def history(blacklist: Blacklist):
     access_token = request.cookies.get('token')
-
-    if not access_token:
-        return jsonify({'error': 'access token is not provided'}), 403
-
-    if blacklist.is_expired(access_token) or is_token_expired(access_token):
-        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(access_token).get('user_id')
     user = User.query.filter_by(id=user_id).first()
@@ -177,6 +175,7 @@ class RoleView(MethodView):
             return jsonify(RoleSchema().dump(role))
         return jsonify(RoleSchema(many=True).dump(Role.query.all()))
 
+    @admin_required
     def post(self):
         title = request.json.get('title')
         if Role.query.filter_by(title=title).first():
@@ -186,6 +185,7 @@ class RoleView(MethodView):
 
         return jsonify({'id': str(r.id)}), 201
 
+    @admin_required
     def patch(self, role_id):
         try:
             role = Role.query.filter_by(id=role_id).first()
@@ -201,6 +201,7 @@ class RoleView(MethodView):
         Role.create(title)
         return jsonify({'info': 'ok'}), 200
 
+    @admin_required
     def delete(self, role_id):
         try:
             role = Role.query.filter_by(id=role_id).first()
