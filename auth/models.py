@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from datetime import timezone
 
-from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
+from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
@@ -13,6 +13,15 @@ from utils.utils import encrypt_password, jwt_encode
 
 class Mixin:
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+
+    def __init__(self, *args, **kwargs):
+        ...
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        obj = cls(*args) if args else cls(**kwargs)
+        obj.save()
+        return obj.id
 
     def save(self):
         try:
@@ -51,7 +60,7 @@ class User(Base, Mixin):
     __tablename__ = 'user'
 
     login = Column(String(50), unique=True, nullable=False)
-    password = Column(String(30), nullable=False)
+    password = Column(String(255), nullable=False)
     role = Column(ForeignKey('role.id'))
 
     def __init__(self, login, password, role=None):
@@ -85,6 +94,17 @@ class User(Base, Mixin):
     def check_password(self, password):
         return encrypt_password(password) == self.password
 
+    def create_account_entrance(self):
+        entrance = AccountEntrance(user=self.id, entrance_date=datetime.now(timezone.utc))
+        entrance.save()
+
+    def update_tokens(self):
+        RefreshToken.query.filter_by(user=self.id).delete()
+        token, refresh = self.generate_tokens()
+        refresh_token = RefreshToken(token=refresh, user=self.id)
+        refresh_token.save()
+        return token, refresh
+
 
 class RefreshToken(Base, Mixin):
     __tablename__ = 'refresh_token'
@@ -103,12 +123,12 @@ class RefreshToken(Base, Mixin):
 class AccountEntrance(Base, Mixin):
     __tablename__ = 'account_entrance'
 
+    user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
+    entrance_date = Column(DateTime, nullable=False)
+
     def __init__(self, user, entrance_date):
         self.user = user
         self.entrance_date = entrance_date
 
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
-
-    user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
-    entrance_date = Column(DateTime, nullable=False)

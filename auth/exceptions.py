@@ -1,0 +1,6 @@
+class NoCredsException(Exception):
+    ...
+
+
+class Http404(Exception):
+    ...

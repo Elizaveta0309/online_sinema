@@ -1,45 +1,32 @@
-from datetime import datetime, timezone
-from functools import wraps
-from http import HTTPStatus
-
 import flask_injector
 import injector
 from flask import jsonify, request
 from flask.views import MethodView
+from sqlalchemy.exc import DataError
 
 from app import app
-from providers import BlacklistModule
-from schemas import RoleSchema, AccountEntranceSchema
-from sqlalchemy.exc import DataError
-from utils.storage import Blacklist
-
-from utils.utils import is_token_expired, jwt_decode, encrypt_password
 from models import RefreshToken, Role, User, AccountEntrance
 from permissions import jwt_required, admin_required
+from providers import BlacklistModule, LoginRequestModule
+from schemas import RoleSchema, AccountEntranceSchema
+from services import LoginRequest
+from utils.storage import Blacklist
+from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
 
+@injector.inject
 @app.route('/api/v1/login', methods=['POST'])
-def login():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
-
-    user = User.query.filter_by(login=login_).first()
+def login(login_request: LoginRequest):
+    user = login_request.user
     if not user:
         return jsonify({'error': 'not found'}), 404
 
-    if not user.check_password(password):
+    if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
 
-    RefreshToken.query.filter_by(user=user.id).delete()
+    token, refresh = user.update_tokens()
 
-    token, refresh = user.generate_tokens()
-    refresh_token = RefreshToken(token=refresh, user=user.id)
-    refresh_token.save()
-
-    entrance = AccountEntrance(user=user.id, entrance_date=datetime.now(timezone.utc))
-    entrance.save()
+    user.create_account_entrance()
 
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
@@ -48,22 +35,16 @@ def login():
     return response, 200
 
 
+@injector.inject
 @app.route('/api/v1/sign_up', methods=['POST'])
-def sign_up():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
+def sign_up(login_request: LoginRequest):
+    user = login_request.user
 
-    user = User.query.filter_by(login=login_).first()
     if user:
         return jsonify({'error': 'user with the login already exists'}), 400
 
-    user = User(login_, password)
-    user.save()
-
+    User.create(login_request.user, login_request.password)
     response = jsonify({'info': 'user created'})
-
     return response, 201
 
 
@@ -75,21 +56,14 @@ def refresh():
         return jsonify({'error': 'no refresh token'}), 403
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+    user = get_object_or_404(User, id=user_id)
 
     existing_refresh_token = RefreshToken.query.filter_by(token=refresh_token).first()
     if not existing_refresh_token or is_token_expired(refresh_token):
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
-    token, refresh_token_new = user.generate_tokens()
+    token, refresh_token_new = user.update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
-
-    existing_refresh_token.delete()
-    rt = RefreshToken(token=refresh_token_new, user=user.id)
-    rt.save()
 
     return response, 200
 
@@ -102,7 +76,7 @@ def logout(blacklist: Blacklist):
     refresh_token = request.cookies.get('refresh')
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
+    user = get_object_or_404(User, id=user_id)
 
     if not user:
         return jsonify({'error': 'user not found'}), 404
@@ -124,6 +98,12 @@ def update_password(blacklist: Blacklist):
     refresh_token = request.cookies.get('refresh')
     old_password = request.json.get('old_password')
     new_password = request.json.get('new_password')
+
+    if not refresh_token or not access_token:
+        return jsonify({'error': 'token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user: User = User.query.filter_by(id=user_id).first()
@@ -148,7 +128,7 @@ def update_password(blacklist: Blacklist):
 
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
-def history(blacklist: Blacklist):
+def history():
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
@@ -185,16 +165,8 @@ def history(blacklist: Blacklist):
 class RoleView(MethodView):
     def get(self, role_id=None):
         if role_id:
-            try:
-                role = Role.query.filter_by(id=role_id).first()
-            except DataError:
-                role = None
-
-            if not role:
-                return jsonify({'error': 'not found'}), 404
-
+            role = get_object_or_404(Role, id=role_id)
             return jsonify(RoleSchema().dump(role))
-
         return jsonify(RoleSchema(many=True).dump(Role.query.all()))
 
     @admin_required
@@ -203,8 +175,7 @@ class RoleView(MethodView):
         if Role.query.filter_by(title=title).first():
             return jsonify({'error': 'role already exists'}), 409
 
-        r = Role(title)
-        r.save()
+        r = Role.create(title)
 
         return jsonify({'id': str(r.id)}), 201
 
@@ -221,9 +192,7 @@ class RoleView(MethodView):
         if not title:
             return jsonify({'error': "title wasn't provided"})
 
-        role.title = title
-        role.save()
-
+        Role.create(title)
         return jsonify({'info': 'ok'}), 200
 
     @admin_required
@@ -249,5 +218,8 @@ app.add_url_rule('/api/v1/roles/<role_id>',
 
 flask_injector.FlaskInjector(
     app=app,
-    modules=[BlacklistModule()],
+    modules=[
+        BlacklistModule(),
+        LoginRequestModule()
+    ],
 )
