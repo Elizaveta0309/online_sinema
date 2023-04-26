@@ -1,0 +1,17 @@
+parameters:
+  - name: user_data
+    in: body
+    description: User's login and password
+    required: true
+    schema:
+      $ref: "#/definitions/UserData"
+responses:
+ 201:
+   description: User created
+   schema:
+     $ref: "#/definitions/SuccessInfo"
+ 400:
+   description: User with the login already exists
+ 401:
+   description: Login and password required
+
