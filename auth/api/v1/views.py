@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
-from functools import wraps
-from http import HTTPStatus
 
 import flask_injector
 import injector
 from flask import jsonify, request
 from flask.views import MethodView
+from flasgger import swag_from, SwaggerView
+from marshmallow import Schema, fields
 
 from app import app
 from providers import BlacklistModule
@@ -15,10 +15,10 @@ from utils.storage import Blacklist
 
 from utils.utils import is_token_expired, jwt_decode, encrypt_password
 from models import RefreshToken, Role, User, AccountEntrance
-from permissions import jwt_required, admin_required
 
 
 @app.route('/api/v1/login', methods=['POST'])
+@swag_from('docs/login.yaml')
 def login():
     login_ = request.json.get('login')
     password = request.json.get('password')
@@ -49,6 +49,7 @@ def login():
 
 
 @app.route('/api/v1/sign_up', methods=['POST'])
+@swag_from('docs/sign_up.yaml')
 def sign_up():
     login_ = request.json.get('login')
     password = request.json.get('password')
@@ -68,6 +69,7 @@ def sign_up():
 
 
 @app.route('/api/v1/refresh', methods=['POST'])
+@swag_from('docs/refresh.yaml')
 def refresh():
     refresh_token = request.json.get('refresh')
 
@@ -96,10 +98,16 @@ def refresh():
 
 @injector.inject
 @app.route('/api/v1/logout', methods=['POST'])
-@jwt_required
+@swag_from('docs/logout.yaml')
 def logout(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
+
+    if not refresh_token or not access_token:
+        return jsonify({'error': 'token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user = User.query.filter_by(id=user_id).first()
@@ -118,12 +126,18 @@ def logout(blacklist: Blacklist):
 
 @injector.inject
 @app.route('/api/v1/update_password', methods=['POST'])
-@jwt_required
+@swag_from('docs/update_password.yaml')
 def update_password(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
     old_password = request.json.get('old_password')
     new_password = request.json.get('new_password')
+
+    if not refresh_token or not access_token:
+        return jsonify({'error': 'token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user: User = User.query.filter_by(id=user_id).first()
@@ -147,9 +161,15 @@ def update_password(blacklist: Blacklist):
 
 
 @app.route('/api/v1/history', methods=['POST'])
-@jwt_required
+@swag_from('docs/history.yaml')
 def history(blacklist: Blacklist):
     access_token = request.cookies.get('token')
+
+    if not access_token:
+        return jsonify({'error': 'access token is not provided'}), 403
+
+    if blacklist.is_expired(access_token) or is_token_expired(access_token):
+        return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(access_token).get('user_id')
     user = User.query.filter_by(id=user_id).first()
@@ -182,8 +202,31 @@ def history(blacklist: Blacklist):
     )
 
 
-class RoleView(MethodView):
+class RoleView(SwaggerView):
+
     def get(self, role_id=None):
+        """
+              ---
+              tags:
+              - get a role or all roles
+              parameters:
+              - name: access_token
+                in: cookie
+                required: True
+                type: 'string'
+              - name: role_id
+                in: path
+                required: False
+                type: 'string'
+              responses:
+                 200:
+                   description: Role by id
+                   schema:
+                      $ref: '#/definitions/Role'
+                 404:
+                   description: Role not found
+
+        """
         if role_id:
             try:
                 role = Role.query.filter_by(id=role_id).first()
@@ -197,8 +240,32 @@ class RoleView(MethodView):
 
         return jsonify(RoleSchema(many=True).dump(Role.query.all()))
 
-    @admin_required
     def post(self):
+        """
+                 Create a role
+                 ---
+                 tags:
+                 - create role
+                 parameters:
+                 - name: access_token
+                   in: cookie
+                   required: True
+                   type: 'string'
+                 - name: title
+                   in: body
+                   required: True
+                   type: 'string'
+                 responses:
+                    201:
+                      description: id of the new role
+                      schema:
+                        $ref: '#/definitions/RoleID'
+                    400:
+                      description: admin rights required
+                    409:
+                      description: Role already exists
+
+               """
         title = request.json.get('title')
         if Role.query.filter_by(title=title).first():
             return jsonify({'error': 'role already exists'}), 409
@@ -208,8 +275,38 @@ class RoleView(MethodView):
 
         return jsonify({'id': str(r.id)}), 201
 
-    @admin_required
     def patch(self, role_id):
+        """
+                 Update title of role
+                 ---
+                 tags:
+                 - update role
+                 parameters:
+                 - name: access_token
+                   in: cookie
+                   required: True
+                   type: 'string'
+                 - name: title
+                   in: body
+                   required: True
+                   type: 'string'
+                 - name: role_id
+                   in: path
+                   required: True
+                   type: 'string'
+                 responses:
+                    200:
+                      description: Role was updated
+                      schema:
+                        $ref: '#/definitions/SuccessInfo'
+                    400:
+                      description: admin rights required
+                    403:
+                      description: Title was not provided
+                    404:
+                      description: Role not found
+
+           """
         try:
             role = Role.query.filter_by(id=role_id).first()
         except DataError:
@@ -219,15 +316,39 @@ class RoleView(MethodView):
 
         title = request.json.get('title')
         if not title:
-            return jsonify({'error': "title wasn't provided"})
+            return jsonify({'error': "title wasn't provided"}), 403
 
         role.title = title
         role.save()
 
         return jsonify({'info': 'ok'}), 200
 
-    @admin_required
     def delete(self, role_id):
+        """
+                 Delete a role by id
+                 ---
+                 tags:
+                 - delete a role
+                 parameters:
+                 - name: access_token
+                   in: cookie
+                   required: True
+                   type: 'string'
+                 - name: role_id
+                   in: path
+                   required: True
+                   type: 'string'
+                 responses:
+                    200:
+                      description: Role was updated
+                      schema:
+                        $ref: '#/definitions/SuccessInfo'
+                    400:
+                      description: admin rights required
+                    404:
+                      description: Role not found
+
+           """
         try:
             role = Role.query.filter_by(id=role_id).first()
         except DataError:
