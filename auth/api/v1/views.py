@@ -1,71 +1,66 @@
+
 from datetime import datetime, timezone
+
+from http import HTTPStatus
 
 import flask_injector
 import injector
 from flask import jsonify, request
 from flask.views import MethodView
+
 from flasgger import swag_from, SwaggerView
-from marshmallow import Schema, fields
 
 from app import app
 from providers import BlacklistModule
 from schemas import RoleSchema, AccountEntranceSchema
+
 from sqlalchemy.exc import DataError
-from utils.storage import Blacklist
 
-from utils.utils import is_token_expired, jwt_decode, encrypt_password
 from models import RefreshToken, Role, User, AccountEntrance
+from permissions import jwt_required, admin_required
+from providers import BlacklistModule, LoginRequestModule
+from schemas import RoleSchema, AccountEntranceSchema
+from services import LoginRequest
+from utils.storage import Blacklist
+from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
 
+
+@injector.inject
 @app.route('/api/v1/login', methods=['POST'])
 @swag_from('docs/login.yaml')
-def login():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
+def login(login_request: LoginRequest):
+    user = login_request.user
 
-    user = User.query.filter_by(login=login_).first()
     if not user:
-        return jsonify({'error': 'not found'}), 404
+        return jsonify({'error': 'not found'}), HTTPStatus.BAD_REQUEST
 
-    if not user.check_password(password):
+    if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
 
-    RefreshToken.query.filter_by(user=user.id).delete()
+    token, refresh = user.update_tokens()
 
-    token, refresh = user.generate_tokens()
-    refresh_token = RefreshToken(token=refresh, user=user.id)
-    refresh_token.save()
-
-    entrance = AccountEntrance(user=user.id, entrance_date=datetime.now(timezone.utc))
-    entrance.save()
+    user.create_account_entrance()
 
     response = jsonify({'info': 'ok'})
     response.set_cookie('token', token)
     response.set_cookie('refresh', refresh)
 
-    return response, 200
+    return response, HTTPStatus.OK
 
 
+@injector.inject
 @app.route('/api/v1/sign_up', methods=['POST'])
 @swag_from('docs/sign_up.yaml')
-def sign_up():
-    login_ = request.json.get('login')
-    password = request.json.get('password')
-    if not (login_ and password):
-        return jsonify({'error': 'нужен логин и пароль'}), 401
+def sign_up(login_request: LoginRequest):
+    user = login_request.user
 
-    user = User.query.filter_by(login=login_).first()
     if user:
-        return jsonify({'error': 'user with the login already exists'}), 400
+        return jsonify({'error': 'user with the login already exists'}), HTTPStatus.BAD_REQUEST
 
-    user = User(login_, password)
-    user.save()
-
+    User.create(login_request.user, login_request.password)
     response = jsonify({'info': 'user created'})
-
-    return response, 201
+    return response, HTTPStatus.CREATED
 
 
 @app.route('/api/v1/refresh', methods=['POST'])
@@ -74,26 +69,19 @@ def refresh():
     refresh_token = request.json.get('refresh')
 
     if not refresh_token:
-        return jsonify({'error': 'no refresh token'}), 403
+        return jsonify({'error': 'no refresh token'}), HTTPStatus.FORBIDDEN
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+    user = get_object_or_404(User, id=user_id)
 
     existing_refresh_token = RefreshToken.query.filter_by(token=refresh_token).first()
     if not existing_refresh_token or is_token_expired(refresh_token):
-        return jsonify({'error': "token doesn't exist or expired"}), 403
+        return jsonify({'error': "token doesn't exist or expired"}), HTTPStatus.FORBIDDEN
 
-    token, refresh_token_new = user.generate_tokens()
+    token, refresh_token_new = user.update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
 
-    existing_refresh_token.delete()
-    rt = RefreshToken(token=refresh_token_new, user=user.id)
-    rt.save()
-
-    return response, 200
+    return response, HTTPStatus.OK
 
 
 @injector.inject
@@ -110,17 +98,17 @@ def logout(blacklist: Blacklist):
         return jsonify({'error': 'token is already blacklisted or expired'}), 400
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
+    user = get_object_or_404(User, id=user_id)
 
     if not user:
-        return jsonify({'error': 'user not found'}), 404
+        return jsonify({'error': 'user not found'}), HTTPStatus.NOT_FOUND
 
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
     return (
         jsonify({"info": "Access token revoked"}),
-        204
+        HTTPStatus.NO_CONTENT
     )
 
 
@@ -134,22 +122,22 @@ def update_password(blacklist: Blacklist):
     new_password = request.json.get('new_password')
 
     if not refresh_token or not access_token:
-        return jsonify({'error': 'token is not provided'}), 403
+        return jsonify({'error': 'token is not provided'}), HTTPStatus.BAD_REQUEST
 
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
-        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+        return jsonify({'error': 'token is already blacklisted or expired'}), HTTPStatus.BAD_REQUEST
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user: User = User.query.filter_by(id=user_id).first()
 
     if not user:
-        return jsonify({'error': 'user not found'}), 404
+        return jsonify({'error': 'user not found'}), HTTPStatus.BAD_REQUEST
 
     if not user.check_password(old_password):
-        return jsonify({'error': 'wrong password'}), 400
+        return jsonify({'error': 'wrong password'}), HTTPStatus.BAD_REQUEST
 
     if user.check_password(new_password):
-        return {'error': 'new password should be different'}, 400
+        return {'error': 'new password should be different'}, HTTPStatus.BAD_REQUEST
 
     user.password = encrypt_password(new_password)
     user.save()
@@ -157,12 +145,14 @@ def update_password(blacklist: Blacklist):
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
-    return jsonify({'info': 'password refreshed'}), 200
+    return jsonify({'info': 'password refreshed'}), HTTPStatus.OK
 
 
 @app.route('/api/v1/history', methods=['POST'])
+
 @swag_from('docs/history.yaml')
-def history(blacklist: Blacklist):
+@jwt_required
+def history():
     access_token = request.cookies.get('token')
 
     if not access_token:
@@ -175,7 +165,7 @@ def history(blacklist: Blacklist):
     user = User.query.filter_by(id=user_id).first()
 
     if not user:
-        return jsonify({'error': 'user not found'}), 404
+        return jsonify({'error': 'user not found'}), HTTPStatus.NOT_FOUND
 
     account_entrances = AccountEntrance.query.filter_by(user=user.id)
     total_entries = account_entrances.count()
@@ -189,7 +179,7 @@ def history(blacklist: Blacklist):
     account_entrances = account_entrances.offset(offset).limit(limit)
 
     if not account_entrances:
-        return jsonify({'error': 'no sessions found'}), 404
+        return jsonify({'error': 'no sessions found'}), HTTPStatus.NOT_FOUND
 
     return (
         jsonify({
@@ -198,7 +188,7 @@ def history(blacklist: Blacklist):
             'page': page,
             'per_page': per_page
         }),
-        200
+        HTTPStatus.OK
     )
 
 
@@ -228,16 +218,8 @@ class RoleView(SwaggerView):
 
         """
         if role_id:
-            try:
-                role = Role.query.filter_by(id=role_id).first()
-            except DataError:
-                role = None
-
-            if not role:
-                return jsonify({'error': 'not found'}), 404
-
+            role = get_object_or_404(Role, id=role_id)
             return jsonify(RoleSchema().dump(role))
-
         return jsonify(RoleSchema(many=True).dump(Role.query.all()))
 
     def post(self):
@@ -268,12 +250,11 @@ class RoleView(SwaggerView):
                """
         title = request.json.get('title')
         if Role.query.filter_by(title=title).first():
-            return jsonify({'error': 'role already exists'}), 409
+            return jsonify({'error': 'role already exists'}), HTTPStatus.CONFLICT
 
-        r = Role(title)
-        r.save()
+        r = Role.create(title)
 
-        return jsonify({'id': str(r.id)}), 201
+        return jsonify({'id': str(r.id)}), HTTPStatus.CREATED
 
     def patch(self, role_id):
         """
@@ -312,16 +293,14 @@ class RoleView(SwaggerView):
         except DataError:
             role = None
         if not role:
-            return jsonify({'error': 'not found'}), 404
+            return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
 
         title = request.json.get('title')
         if not title:
             return jsonify({'error': "title wasn't provided"}), 403
 
-        role.title = title
-        role.save()
-
-        return jsonify({'info': 'ok'}), 200
+        Role.create(title)
+        return jsonify({'info': 'ok'}), HTTPStatus.OK
 
     def delete(self, role_id):
         """
@@ -355,11 +334,11 @@ class RoleView(SwaggerView):
             role = None
 
         if not role:
-            return jsonify({'error': 'not found'}), 404
+            return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
 
         role.delete()
 
-        return jsonify({'info': 'ok'}), 200
+        return jsonify({'info': 'ok'}), HTTPStatus.OK
 
 
 role_view = RoleView.as_view('role_api')
@@ -370,5 +349,8 @@ app.add_url_rule('/api/v1/roles/<role_id>',
 
 flask_injector.FlaskInjector(
     app=app,
-    modules=[BlacklistModule()],
+    modules=[
+        BlacklistModule(),
+        LoginRequestModule()
+    ],
 )
