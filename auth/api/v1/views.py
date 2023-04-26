@@ -1,22 +1,16 @@
-from datetime import datetime, timezone
-from functools import wraps
-from http import HTTPStatus
-
 import flask_injector
 import injector
 from flask import jsonify, request
 from flask.views import MethodView
+from sqlalchemy.exc import DataError
 
 from app import app
 from models import RefreshToken, Role, User, AccountEntrance
+from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
 from utils.storage import Blacklist
-
-from utils.utils import is_token_expired, jwt_decode, encrypt_password
-from models import RefreshToken, Role, User, AccountEntrance
-from permissions import jwt_required, admin_required
 from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
 
@@ -134,7 +128,7 @@ def update_password(blacklist: Blacklist):
 
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
-def history(blacklist: Blacklist):
+def history():
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
@@ -181,7 +175,7 @@ class RoleView(MethodView):
         if Role.query.filter_by(title=title).first():
             return jsonify({'error': 'role already exists'}), 409
 
-        Role.create(title)
+        r = Role.create(title)
 
         return jsonify({'id': str(r.id)}), 201
 

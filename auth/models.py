@@ -21,6 +21,7 @@ class Mixin:
     def create(cls, *args, **kwargs):
         obj = cls(*args) if args else cls(**kwargs)
         obj.save()
+        return obj.id
 
     def save(self):
         try:
