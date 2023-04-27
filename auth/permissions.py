@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 from utils.utils import is_token_expired, jwt_decode
 
-from models import Role, User
+from db.models import Role, User
 
 
 def jwt_required(f):
@@ -33,8 +33,8 @@ def jwt_required(f):
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
-        refresh_token = request.cookies.get('refresh')
-        user_id = jwt_decode(refresh_token).get('user_id')
+        token = request.cookies.get('token')
+        user_id = jwt_decode(token).get('user_id')
         user: User = User.query.filter_by(id=user_id).first()
         role = Role.query.filter_by(id=user.role).first()
 

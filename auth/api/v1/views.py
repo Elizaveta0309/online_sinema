@@ -5,7 +5,7 @@ from flask.views import MethodView
 from sqlalchemy.exc import DataError
 
 from app import app
-from models import RefreshToken, Role, User, AccountEntrance
+from db.models import RefreshToken, Role, User, AccountEntrance
 from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
@@ -24,7 +24,7 @@ def login(login_request: LoginRequest):
     if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
 
-    token, refresh = user.update_tokens()
+    token, refresh = user.create_or_update_tokens()
 
     user.create_account_entrance()
 
@@ -43,7 +43,7 @@ def sign_up(login_request: LoginRequest):
     if user:
         return jsonify({'error': 'user with the login already exists'}), 400
 
-    User.create(login_request.user, login_request.password)
+    User.create(login_request.login, login_request.password)
     response = jsonify({'info': 'user created'})
     return response, 201
 
@@ -62,7 +62,7 @@ def refresh():
     if not existing_refresh_token or is_token_expired(refresh_token):
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
-    token, refresh_token_new = user.update_tokens()
+    token, refresh_token_new = user.create_or_update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     return response, 200
@@ -126,9 +126,10 @@ def update_password(blacklist: Blacklist):
     return jsonify({'info': 'password refreshed'}), 200
 
 
+@injector.inject
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
-def history():
+def history(blacklist: Blacklist):
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
@@ -181,18 +182,13 @@ class RoleView(MethodView):
 
     @admin_required
     def patch(self, role_id):
-        try:
-            role = Role.query.filter_by(id=role_id).first()
-        except DataError:
-            role = None
-        if not role:
-            return jsonify({'error': 'not found'}), 404
-
         title = request.json.get('title')
         if not title:
             return jsonify({'error': "title wasn't provided"})
 
-        Role.create(title)
+        role = get_object_or_404(Role, id=role_id)
+        role.title = title
+        role.save()
         return jsonify({'info': 'ok'}), 200
 
     @admin_required

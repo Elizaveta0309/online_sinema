@@ -1,8 +1,9 @@
-from flask import request, jsonify
+from flask import request
 from sqlalchemy.exc import ProgrammingError
 
+from db.db import db_session
 from exceptions import NoCredsException
-from models import User
+from db.models import User
 
 
 class LoginRequest:

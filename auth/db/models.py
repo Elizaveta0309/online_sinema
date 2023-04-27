@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
 from config import settings
-from db import Base, db_session
+from db.db import db_session, Base
 from utils.utils import encrypt_password, jwt_encode
 
 
@@ -21,7 +21,7 @@ class Mixin:
     def create(cls, *args, **kwargs):
         obj = cls(*args) if args else cls(**kwargs)
         obj.save()
-        return obj.id
+        return obj
 
     def save(self):
         try:
@@ -98,7 +98,7 @@ class User(Base, Mixin):
         entrance = AccountEntrance(user=self.id, entrance_date=datetime.now(timezone.utc))
         entrance.save()
 
-    def update_tokens(self):
+    def create_or_update_tokens(self):
         RefreshToken.query.filter_by(user=self.id).delete()
         token, refresh = self.generate_tokens()
         refresh_token = RefreshToken(token=refresh, user=self.id)
@@ -110,7 +110,7 @@ class RefreshToken(Base, Mixin):
     __tablename__ = 'refresh_token'
 
     token = Column(String(200), nullable=False, unique=True)
-    user = Column(ForeignKey('user.id'))
+    user = Column(ForeignKey('user.id', ondelete='CASCADE'))
 
     def __init__(self, token, user):
         self.token = token

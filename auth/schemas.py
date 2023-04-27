@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
-from models import Role, AccountEntrance
+from db.models import Role, AccountEntrance
 
 
 class RoleSchema(SQLAlchemyAutoSchema):
