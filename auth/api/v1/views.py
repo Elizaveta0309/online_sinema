@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import flask_injector
 import injector
 from flask import jsonify, request
@@ -5,11 +7,6 @@ from flask.views import MethodView
 from sqlalchemy.exc import DataError
 
 from app import app
-from providers import BlacklistModule
-from schemas import RoleSchema, AccountEntranceSchema
-
-from sqlalchemy.exc import DataError
-
 from db.models import RefreshToken, Role, User, AccountEntrance
 from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
@@ -24,7 +21,7 @@ from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_obje
 def login(login_request: LoginRequest):
     user = login_request.user
     if not user:
-        return jsonify({'error': 'not found'}), 404
+        return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
 
     if not user.check_password(login_request.password):
         return {'error': 'wrong password'}
@@ -37,7 +34,7 @@ def login(login_request: LoginRequest):
     response.set_cookie('token', token)
     response.set_cookie('refresh', refresh)
 
-    return response, 200
+    return response, HTTPStatus.OK
 
 
 @injector.inject
@@ -46,11 +43,11 @@ def sign_up(login_request: LoginRequest):
     user = login_request.user
 
     if user:
-        return jsonify({'error': 'user with the login already exists'}), 400
+        return jsonify({'error': 'user with the login already exists'}), HTTPStatus.BAD_REQUEST
 
     User.create(login_request.login, login_request.password)
     response = jsonify({'info': 'user created'})
-    return response, 201
+    return response, HTTPStatus.CREATED
 
 
 @app.route('/api/v1/refresh', methods=['POST'])
@@ -58,19 +55,19 @@ def refresh():
     refresh_token = request.json.get('refresh')
 
     if not refresh_token:
-        return jsonify({'error': 'no refresh token'}), 403
+        return jsonify({'error': 'no refresh token'}), HTTPStatus.FORBIDDEN
 
     user_id = jwt_decode(refresh_token).get('user_id')
     user = get_object_or_404(User, id=user_id)
 
     existing_refresh_token = RefreshToken.query.filter_by(token=refresh_token).first()
     if not existing_refresh_token or is_token_expired(refresh_token):
-        return jsonify({'error': "token doesn't exist or expired"}), 403
+        return jsonify({'error': "token doesn't exist or expired"}), HTTPStatus.FORBIDDEN
 
     token, refresh_token_new = user.update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
 
-    return response, 200
+    return response, HTTPStatus.OK
 
 
 @injector.inject
@@ -83,15 +80,12 @@ def logout(blacklist: Blacklist):
     user_id = jwt_decode(refresh_token).get('user_id')
     user = get_object_or_404(User, id=user_id)
 
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
-
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
     return (
         jsonify({"info": "Access token revoked"}),
-        204
+        HTTPStatus.NO_CONTENT
     )
 
 
@@ -105,22 +99,19 @@ def update_password(blacklist: Blacklist):
     new_password = request.json.get('new_password')
 
     if not refresh_token or not access_token:
-        return jsonify({'error': 'token is not provided'}), 403
+        return jsonify({'error': 'token is not provided'}), HTTPStatus.FORBIDDEN
 
     if blacklist.is_expired(access_token) or is_token_expired(access_token):
-        return jsonify({'error': 'token is already blacklisted or expired'}), 400
+        return jsonify({'error': 'token is already blacklisted or expired'}), HTTPStatus.BAD_REQUEST
 
     user_id = jwt_decode(refresh_token).get('user_id')
-    user: User = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+    user = get_object_or_404(User, id=user_id)
 
     if not user.check_password(old_password):
-        return jsonify({'error': 'wrong password'}), 400
+        return jsonify({'error': 'wrong password'}), HTTPStatus.BAD_REQUEST
 
     if user.check_password(new_password):
-        return {'error': 'new password should be different'}, 400
+        return {'error': 'new password should be different'}, HTTPStatus.BAD_REQUEST
 
     user.password = encrypt_password(new_password)
     user.save()
@@ -128,7 +119,7 @@ def update_password(blacklist: Blacklist):
     RefreshToken.query.filter_by(user=user.id).delete()
     blacklist.add_to_expired(access_token)
 
-    return jsonify({'info': 'password refreshed'}), 200
+    return jsonify({'info': 'password refreshed'}), HTTPStatus.OK
 
 
 @app.route('/api/v1/history', methods=['POST'])
@@ -137,10 +128,7 @@ def history():
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
-    user = User.query.filter_by(id=user_id).first()
-
-    if not user:
-        return jsonify({'error': 'user not found'}), 404
+    user = get_object_or_404(User, id=user_id)
 
     account_entrances = AccountEntrance.query.filter_by(user=user.id)
     total_entries = account_entrances.count()
@@ -154,7 +142,7 @@ def history():
     account_entrances = account_entrances.offset(offset).limit(limit)
 
     if not account_entrances:
-        return jsonify({'error': 'no sessions found'}), 404
+        return jsonify({'error': 'no sessions found'}), HTTPStatus.NOT_FOUND
 
     return (
         jsonify({
@@ -178,11 +166,11 @@ class RoleView(MethodView):
     def post(self):
         title = request.json.get('title')
         if Role.query.filter_by(title=title).first():
-            return jsonify({'error': 'role already exists'}), 409
+            return jsonify({'error': 'role already exists'}), HTTPStatus.CONFLICT
 
         r = Role.create(title)
 
-        return jsonify({'id': str(r.id)}), 201
+        return jsonify({'id': str(r.id)}), HTTPStatus.CREATED
 
     @admin_required
     def patch(self, role_id):
@@ -231,23 +219,13 @@ class RoleView(MethodView):
         role = get_object_or_404(Role, id=role_id)
         role.title = title
         role.save()
-        return jsonify({'info': 'ok'}), 200
-        Role.create(title)
         return jsonify({'info': 'ok'}), HTTPStatus.OK
 
     @admin_required
     def delete(self, role_id):
-        try:
-            role = Role.query.filter_by(id=role_id).first()
-        except DataError:
-            role = None
-
-        if not role:
-            return jsonify({'error': 'not found'}), 404
-
+        role = get_object_or_404(Role, id=role_id)
         role.delete()
-
-        return jsonify({'info': 'ok'}), 200
+        return jsonify({'info': 'ok'}), HTTPStatus.OK
 
 
 role_view = RoleView.as_view('role_api')
