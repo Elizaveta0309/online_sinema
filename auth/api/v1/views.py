@@ -5,6 +5,11 @@ from flask.views import MethodView
 from sqlalchemy.exc import DataError
 
 from app import app
+from providers import BlacklistModule
+from schemas import RoleSchema, AccountEntranceSchema
+
+from sqlalchemy.exc import DataError
+
 from db.models import RefreshToken, Role, User, AccountEntrance
 from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
@@ -62,7 +67,7 @@ def refresh():
     if not existing_refresh_token or is_token_expired(refresh_token):
         return jsonify({'error': "token doesn't exist or expired"}), 403
 
-    token, refresh_token_new = user.create_or_update_tokens()
+    token, refresh_token_new = user.update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     return response, 200
@@ -126,10 +131,9 @@ def update_password(blacklist: Blacklist):
     return jsonify({'info': 'password refreshed'}), 200
 
 
-@injector.inject
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
-def history(blacklist: Blacklist):
+def history():
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
@@ -182,6 +186,44 @@ class RoleView(MethodView):
 
     @admin_required
     def patch(self, role_id):
+        """
+                 Update title of role
+                 ---
+                 tags:
+                 - update role
+                 parameters:
+                 - name: access_token
+                   in: cookie
+                   required: True
+                   type: 'string'
+                 - name: title
+                   in: body
+                   required: True
+                   type: 'string'
+                 - name: role_id
+                   in: path
+                   required: True
+                   type: 'string'
+                 responses:
+                    200:
+                      description: Role was updated
+                      schema:
+                        $ref: '#/definitions/SuccessInfo'
+                    400:
+                      description: admin rights required
+                    403:
+                      description: Title was not provided
+                    404:
+                      description: Role not found
+
+           """
+        try:
+            role = Role.query.filter_by(id=role_id).first()
+        except DataError:
+            role = None
+        if not role:
+            return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
+
         title = request.json.get('title')
         if not title:
             return jsonify({'error': "title wasn't provided"})
@@ -190,6 +232,8 @@ class RoleView(MethodView):
         role.title = title
         role.save()
         return jsonify({'info': 'ok'}), 200
+        Role.create(title)
+        return jsonify({'info': 'ok'}), HTTPStatus.OK
 
     @admin_required
     def delete(self, role_id):
