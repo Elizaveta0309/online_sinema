@@ -151,7 +151,7 @@ def history():
             'page': page,
             'per_page': per_page
         }),
-        200
+        HTTPStatus.OK
     )
 
 
