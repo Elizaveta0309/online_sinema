@@ -40,7 +40,7 @@ services:
     image: redis
     container_name: redis
     ports:
-      - "6379:6379"
+      - "6379"
 
   etl:
     container_name: etl
@@ -71,7 +71,7 @@ services:
     build: auth
     container_name: auth
     ports:
-      - "5000:5000"
+      - "5000"
     volumes:
       - ./auth:/opt/app
 
@@ -83,7 +83,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "5433:5433"
+      - "5433"
     command:
       - -p 5433
     restart: always
