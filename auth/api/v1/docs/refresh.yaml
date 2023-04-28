@@ -1,10 +1,10 @@
 parameters:
-  - name: token
+  - name: refresh_token
     in: body
     description: User's refresh token
-    schema:
-      type: string
     required: true
+    schema:
+      $ref: "#/definitions/Token"
 responses:
  200:
    description: Tokens are issued

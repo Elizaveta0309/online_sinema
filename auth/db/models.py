@@ -29,7 +29,7 @@ class Mixin:
             db_session.commit()
         except (PendingRollbackError, DataError) as e:
             db_session.rollback()
-            raise from e
+            raise e
 
     def delete(self):
         self.__class__.query.filter_by(id=self.id).delete()

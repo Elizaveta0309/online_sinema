@@ -31,7 +31,7 @@ def login(login_request: LoginRequest):
 
     user.create_account_entrance()
 
-    response = jsonify({'info': 'ok'})
+    response = jsonify({'info': 'ok', 'token': token, 'refresh': refresh})
     response.set_cookie('token', token)
     response.set_cookie('refresh', refresh)
 
@@ -67,7 +67,7 @@ def refresh():
     if not existing_refresh_token or is_token_expired(refresh_token):
         return jsonify({'error': "token doesn't exist or expired"}), HTTPStatus.FORBIDDEN
 
-    token, refresh_token_new = user.update_tokens()
+    token, refresh_token_new = user.create_or_update_tokens()
     response = jsonify({'token': token, 'refresh': refresh_token_new})
 
     return response, HTTPStatus.OK
@@ -103,12 +103,6 @@ def update_password(blacklist: Blacklist):
     old_password = request.json.get('old_password')
     new_password = request.json.get('new_password')
 
-    if not refresh_token or not access_token:
-        return jsonify({'error': 'token is not provided'}), HTTPStatus.FORBIDDEN
-
-    if blacklist.is_expired(access_token) or is_token_expired(access_token):
-        return jsonify({'error': 'token is already blacklisted or expired'}), HTTPStatus.BAD_REQUEST
-
     user_id = jwt_decode(refresh_token).get('user_id')
     user = get_object_or_404(User, id=user_id)
 
@@ -130,7 +124,7 @@ def update_password(blacklist: Blacklist):
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
 @swag_from('docs/history.yaml')
-def history():
+def history(blacklist: Blacklist):
     access_token = request.cookies.get('token')
 
     user_id = jwt_decode(access_token).get('user_id')
@@ -154,13 +148,14 @@ def history():
             'data': AccountEntranceSchema(many=True).dump(account_entrances),
             'total_entries': total_entries,
             'page': page,
-            'per_page': per_page
+            'per_page': limit
         }),
         HTTPStatus.OK
     )
 
 
 class RoleView(MethodView):
+    @admin_required
     def get(self, role_id=None):
         """
           ---
@@ -203,7 +198,8 @@ class RoleView(MethodView):
              - name: title
                in: body
                required: True
-               type: 'string'
+               schema:
+                 $ref: '#/definitions/RoleTitle'
              responses:
                 201:
                   description: id of the new role
@@ -237,7 +233,8 @@ class RoleView(MethodView):
              - name: title
                in: body
                required: True
-               type: 'string'
+               schema:
+                 $ref: '#/definitions/RoleTitle'
              - name: role_id
                in: path
                required: True

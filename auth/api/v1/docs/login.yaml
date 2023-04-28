@@ -52,6 +52,17 @@ definitions:
        description: Id of the role
        type: string
        example: 2322knndkd8ghk
+ RoleTitle:
+   properties:
+     title:
+       description: Title of the role
+       type: string
+       example: Admin
+ Token:
+   properties:
+     refresh:
+       description: User's refresh token
+       type: string
 
 
 
