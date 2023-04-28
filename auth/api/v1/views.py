@@ -40,6 +40,7 @@ def login(login_request: LoginRequest):
 
 @injector.inject
 @app.route('/api/v1/sign_up', methods=['POST'])
+@swag_from('docs/sign_up.yaml')
 def sign_up(login_request: LoginRequest):
     user = login_request.user
 
@@ -135,14 +136,13 @@ def history():
     user_id = jwt_decode(access_token).get('user_id')
     user = get_object_or_404(User, id=user_id)
 
-    account_entrances = AccountEntrance.query.filter_by(user=user.id)
+    account_entrances = user.get_account_entrances()
     total_entries = account_entrances.count()
 
     page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
+    limit = int(request.args.get('per_page', 10))
 
-    offset = (page - 1) * per_page
-    limit = per_page
+    offset = (page - 1) * limit
 
     account_entrances = account_entrances.offset(offset).limit(limit)
 

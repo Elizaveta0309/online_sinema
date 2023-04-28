@@ -29,7 +29,7 @@ class Mixin:
             db_session.commit()
         except (PendingRollbackError, DataError) as e:
             db_session.rollback()
-            raise e
+            raise from e
 
     def delete(self):
         self.__class__.query.filter_by(id=self.id).delete()
@@ -104,6 +104,9 @@ class User(Base, Mixin):
         refresh_token = RefreshToken(token=refresh, user=self.id)
         refresh_token.save()
         return token, refresh
+
+    def get_account_entrances(self):
+        return AccountEntrance.query.filter_by(user=self.id)
 
 
 class RefreshToken(Base, Mixin):
