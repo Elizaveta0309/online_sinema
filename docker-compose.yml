@@ -34,7 +34,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 5000M
+          memory: 1000M
 
   redis:
     image: redis

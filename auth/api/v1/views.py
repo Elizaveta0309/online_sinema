@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 import flask_injector
 import injector
+from flasgger import swag_from
 from flask import jsonify, request
 from flask.views import MethodView
-from sqlalchemy.exc import DataError
 
 from app import app
 from db.models import RefreshToken, Role, User, AccountEntrance
@@ -18,6 +18,7 @@ from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_obje
 
 @injector.inject
 @app.route('/api/v1/login', methods=['POST'])
+@swag_from('docs/login.yaml')
 def login(login_request: LoginRequest):
     user = login_request.user
     if not user:
@@ -51,6 +52,7 @@ def sign_up(login_request: LoginRequest):
 
 
 @app.route('/api/v1/refresh', methods=['POST'])
+@swag_from('docs/refresh.yaml')
 def refresh():
     refresh_token = request.json.get('refresh')
 
@@ -73,6 +75,7 @@ def refresh():
 @injector.inject
 @app.route('/api/v1/logout', methods=['POST'])
 @jwt_required
+@swag_from('docs/logout.yaml')
 def logout(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
@@ -92,6 +95,7 @@ def logout(blacklist: Blacklist):
 @injector.inject
 @app.route('/api/v1/update_password', methods=['POST'])
 @jwt_required
+@swag_from('docs/update_password.yaml')
 def update_password(blacklist: Blacklist):
     access_token = request.cookies.get('token')
     refresh_token = request.cookies.get('refresh')
@@ -124,6 +128,7 @@ def update_password(blacklist: Blacklist):
 
 @app.route('/api/v1/history', methods=['POST'])
 @jwt_required
+@swag_from('docs/history.yaml')
 def history():
     access_token = request.cookies.get('token')
 
@@ -157,6 +162,27 @@ def history():
 
 class RoleView(MethodView):
     def get(self, role_id=None):
+        """
+          ---
+          tags:
+          - get a role or all roles
+          parameters:
+          - name: access_token
+            in: cookie
+            required: True
+            type: 'string'
+          - name: role_id
+            in: path
+            required: False
+            type: 'string'
+          responses:
+             200:
+               description: Role by id
+               schema:
+                  $ref: '#/definitions/Role'
+             404:
+               description: Role not found
+        """
         if role_id:
             role = get_object_or_404(Role, id=role_id)
             return jsonify(RoleSchema().dump(role))
@@ -164,6 +190,30 @@ class RoleView(MethodView):
 
     @admin_required
     def post(self):
+        """
+             Create a role
+             ---
+             tags:
+             - create role
+             parameters:
+             - name: access_token
+               in: cookie
+               required: True
+               type: 'string'
+             - name: title
+               in: body
+               required: True
+               type: 'string'
+             responses:
+                201:
+                  description: id of the new role
+                  schema:
+                    $ref: '#/definitions/RoleID'
+                400:
+                  description: admin rights required
+                409:
+                  description: Role already exists
+        """
         title = request.json.get('title')
         if Role.query.filter_by(title=title).first():
             return jsonify({'error': 'role already exists'}), HTTPStatus.CONFLICT
@@ -175,42 +225,36 @@ class RoleView(MethodView):
     @admin_required
     def patch(self, role_id):
         """
-                 Update title of role
-                 ---
-                 tags:
-                 - update role
-                 parameters:
-                 - name: access_token
-                   in: cookie
-                   required: True
-                   type: 'string'
-                 - name: title
-                   in: body
-                   required: True
-                   type: 'string'
-                 - name: role_id
-                   in: path
-                   required: True
-                   type: 'string'
-                 responses:
-                    200:
-                      description: Role was updated
-                      schema:
-                        $ref: '#/definitions/SuccessInfo'
-                    400:
-                      description: admin rights required
-                    403:
-                      description: Title was not provided
-                    404:
-                      description: Role not found
+             Update title of role
+             ---
+             tags:
+             - update role
+             parameters:
+             - name: access_token
+               in: cookie
+               required: True
+               type: 'string'
+             - name: title
+               in: body
+               required: True
+               type: 'string'
+             - name: role_id
+               in: path
+               required: True
+               type: 'string'
+             responses:
+                200:
+                  description: Role was updated
+                  schema:
+                    $ref: '#/definitions/SuccessInfo'
+                400:
+                  description: admin rights required
+                403:
+                  description: Title was not provided
+                404:
+                  description: Role not found
 
-           """
-        try:
-            role = Role.query.filter_by(id=role_id).first()
-        except DataError:
-            role = None
-        if not role:
-            return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
+        """
 
         title = request.json.get('title')
         if not title:
@@ -223,6 +267,30 @@ class RoleView(MethodView):
 
     @admin_required
     def delete(self, role_id):
+        """
+             Delete a role by id
+             ---
+             tags:
+             - delete a role
+             parameters:
+             - name: access_token
+               in: cookie
+               required: True
+               type: 'string'
+             - name: role_id
+               in: path
+               required: True
+               type: 'string'
+             responses:
+                200:
+                  description: Role was updated
+                  schema:
+                    $ref: '#/definitions/SuccessInfo'
+                400:
+                  description: admin rights required
+                404:
+                  description: Role not found
+        """
         role = get_object_or_404(Role, id=role_id)
         role.delete()
         return jsonify({'info': 'ok'}), HTTPStatus.OK
