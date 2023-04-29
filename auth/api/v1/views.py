@@ -2,18 +2,28 @@ from http import HTTPStatus
 
 import flask_injector
 import injector
+import requests
 from flasgger import swag_from
 from flask import jsonify, request
 from flask.views import MethodView
 
 from app import app
-from db.models import RefreshToken, Role, User, AccountEntrance
+from db.models import RefreshToken, Role, User, UserSocial
 from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
+from socials import get_social_access_url
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
+
+flask_injector.FlaskInjector(
+    app=app,
+    modules=[
+        BlacklistModule(),
+        LoginRequestModule()
+    ],
+)
 
 
 @injector.inject
@@ -154,7 +164,7 @@ def history():
             'data': AccountEntranceSchema(many=True).dump(account_entrances),
             'total_entries': total_entries,
             'page': page,
-            'per_page': per_page
+            'per_page': limit
         }),
         HTTPStatus.OK
     )
@@ -179,7 +189,7 @@ class RoleView(MethodView):
              200:
                description: Role by id
                schema:
-                  $ref: '#/definitions/Role'
+                  $reper_pagef: '#/definitions/Role'
              404:
                description: Role not found
         """
@@ -258,7 +268,7 @@ class RoleView(MethodView):
 
         title = request.json.get('title')
         if not title:
-            return jsonify({'error': "title wasn't provided"})
+            return jsonify({'error': "title wasn't provided"}), HTTPStatus.FORBIDDEN
 
         role = get_object_or_404(Role, id=role_id)
         role.title = title
@@ -302,10 +312,36 @@ app.add_url_rule('/api/v1/roles/',
 app.add_url_rule('/api/v1/roles/<role_id>',
                  view_func=role_view, methods=['GET', 'PATCH', 'DELETE'])
 
-flask_injector.FlaskInjector(
-    app=app,
-    modules=[
-        BlacklistModule(),
-        LoginRequestModule()
-    ],
-)
+
+@app.route('/api/v1/oauth_vk', methods=['POST'])
+def oauth():
+    social = request.args.get('social')
+    if not social:
+        return jsonify({'error': 'please provide social type'}), HTTPStatus.FORBIDDEN
+    social_access_url = get_social_access_url(social)
+    return jsonify({'url': social_access_url})
+
+
+@app.route('/api/v1/callback')
+def callback():
+    a = request
+    code = request.args['code']
+    # url = f'https://oauth.vk.com/access_token/'
+    url = f'https://oauth.vk.com/access_token?client_id=51629723&client_secret=NgRvwx5YoYGauO39VANy&code={code}&redirect_uri=http%3A%2F%2F3a17-46-138-168-89.ngrok-free.app%2Fapi%2Fv1%2Fcallback'
+    data = requests.get(url).json()
+    access_token = data.get('access_token', '')
+    if access_token.startswith('vk1'):
+        social_user_id = str(data['user_id'])
+
+        if user_social := UserSocial.query.filter_by(social_user_id=social_user_id).first():
+            user = User.query.filter_by(id=user_social.user).first()
+        else:
+            user = User.create(social_user_id, 'social')
+            UserSocial.create(user=user.id, social_user_id=social_user_id)
+
+        token, refresh = user.create_or_update_tokens()
+        user.create_account_entrance()
+        response = jsonify({'info': 'ok'})
+        response.set_cookie('token', token)
+        response.set_cookie('refresh', refresh)
+        return response, HTTPStatus.OK

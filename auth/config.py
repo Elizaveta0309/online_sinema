@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     TOKEN_EXP: int = 10
     REFRESH_EXP: int = 43200
     SALT: bytes = b'$2b$12$PuxeYPUtTZ2bvJjWR0ZWVu'
+    # VK_ACCESS_TOKEN: str = '56f911a756f911a756f911a7be55eadf3c556f956f911a732b5c421e34cae8c3b60a34f'
+    VK_ACCESS_TOKEN: str = 'NgRvwx5YoYGauO39VANy'
+    OAUTH_REDIRECT_URI: str = 'http://3a17-46-138-168-89.ngrok-free.app/api/v1/callback'
 
     class Config:
         env_file = '.env'

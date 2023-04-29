@@ -4,8 +4,11 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from config import settings
 
+# dsl = f'postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}' \
+#       f'@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/postgres'
+#
 dsl = f'postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}' \
-      f'@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/postgres'
+      f'@localhost:5433/postgres'
 
 engine = create_engine(dsl)
 db_session = scoped_session(sessionmaker(autocommit=False,

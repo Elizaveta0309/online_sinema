@@ -1,3 +1,4 @@
+import enum
 import uuid
 from datetime import datetime, timedelta
 from datetime import timezone
@@ -29,7 +30,7 @@ class Mixin:
             db_session.commit()
         except (PendingRollbackError, DataError) as e:
             db_session.rollback()
-            raise from e
+            raise e
 
     def delete(self):
         self.__class__.query.filter_by(id=self.id).delete()
@@ -135,3 +136,21 @@ class AccountEntrance(Base, Mixin):
 
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
+
+
+class SocialType(enum.Enum):
+    VK = 'vk'
+
+
+class UserSocial(Base, Mixin):
+    __tablename__ = 'user_social'
+
+    user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
+    social_user_id = Column(String(255), nullable=False)
+
+    def __init__(self, user, social_user_id):
+        self.user = user
+        self.social_user_id = social_user_id
+
+# class OAuthToken(Base, Mixin):
+#     user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
