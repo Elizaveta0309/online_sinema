@@ -90,6 +90,12 @@ services:
     volumes:
       - postgres-data-auth:/var/lib/postgresql/data
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.22.0
+    ports:
+      - "16686:16686"
+
+
 volumes:
   data:
   postgres-data:
