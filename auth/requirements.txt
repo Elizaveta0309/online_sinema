@@ -20,6 +20,5 @@ opentelemetry-api==1.10.0
 opentelemetry-sdk==1.10.0
 opentelemetry-instrumentation-flask==0.29b1
 opentelemetry-exporter-jaeger==1.10.0
-opentracing_decorator==1.1.0
-jaeger-client==4.8.0
+Flask-Limiter==3.3.0
 

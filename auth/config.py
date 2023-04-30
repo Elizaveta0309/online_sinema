@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     TOKEN_EXP: int = 10
     REFRESH_EXP: int = 43200
     SALT: bytes = b'$2b$12$PuxeYPUtTZ2bvJjWR0ZWVu'
+    REQUEST_NUM_LIMIT: int = 100
+    REQUEST_TIME_LIMIT: str = 'minute'
 
     class Config:
         env_file = '.env'
