@@ -1,19 +1,17 @@
+from authlib.integrations.flask_client import OAuth
 from flasgger import Swagger
 from flask import Flask
-
-from flask_request_id_header.middleware import RequestID
-
-from opentelemetry import trace
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from config import settings
+from flask_request_id_header.middleware import RequestID
+from opentelemetry import trace
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from config import settings
 from middleware import ExceptionHandlerMiddleware
 
 resource = Resource(attributes={
@@ -36,7 +34,9 @@ def configure_tracer() -> None:
 configure_tracer()
 
 app = Flask(__name__)
+app.secret_key = settings.SECRET
 
+oauth = OAuth(app)
 
 FlaskInstrumentor().instrument_app(app)
 
@@ -49,7 +49,6 @@ limiter = Limiter(
         f'{settings.REQUEST_NUM_LIMIT} per {settings.REQUEST_TIME_LIMIT}'
     ]
 )
-
 
 swagger = Swagger(app)
 
