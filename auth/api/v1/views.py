@@ -1,19 +1,19 @@
 from http import HTTPStatus
 
-from opentelemetry import trace
-
 import flask_injector
 import injector
 from flasgger import swag_from
 from flask import jsonify, request
 from flask.views import MethodView
+from opentelemetry import trace
 
 from app import app
-from db.models import RefreshToken, Role, User, AccountEntrance
 from permissions import jwt_required, admin_required, is_not_logged_in
+from db.models import RefreshToken, Role, User
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
+from socials import get_provider
 from utils.storage import Blacklist
 from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
 
@@ -56,7 +56,6 @@ def login(login_request: LoginRequest, blacklist: Blacklist):
 @swag_from('docs/sign_up.yaml')
 def sign_up(login_request: LoginRequest):
     with tracer.start_as_current_span('sign_up') as sign_up:
-
         request_id = request.headers.get('X-Request-Id')
         sign_up.set_attribute('http.request_id', request_id)
 
@@ -108,7 +107,6 @@ def refresh():
 @swag_from('docs/logout.yaml')
 def logout(blacklist: Blacklist):
     with tracer.start_as_current_span('logout') as logout:
-
         request_id = request.headers.get('X-Request-Id')
         logout.set_attribute('http.request_id', request_id)
 
@@ -171,7 +169,6 @@ def update_password(blacklist: Blacklist):
 @swag_from('docs/history.yaml')
 def history(blacklist: Blacklist):
     with tracer.start_as_current_span('history') as history:
-
         request_id = request.headers.get('X-Request-Id')
         history.set_attribute('http.request_id', request_id)
 
@@ -230,7 +227,6 @@ class RoleView(MethodView):
                description: Role not found
         """
         with tracer.start_as_current_span('role') as role:
-
             request_id = request.headers.get('X-Request-Id')
             role.set_attribute('http.request_id', request_id)
 
@@ -269,7 +265,6 @@ class RoleView(MethodView):
                   description: Role already exists
         """
         with tracer.start_as_current_span('create_role') as create_role:
-
             request_id = request.headers.get('X-Request-Id')
             create_role.set_attribute('http.request_id', request_id)
 
@@ -383,3 +378,24 @@ flask_injector.FlaskInjector(
         LoginRequestModule()
     ],
 )
+
+
+@app.route('/api/v1/oauth', methods=['GET'])
+def oauth():
+    provider_id = request.args.get('provider_id')
+
+    if not provider_id:
+        return jsonify({'error': 'please provide provider type'}), HTTPStatus.FORBIDDEN
+    provider = get_provider(provider_id)
+
+    if not provider:
+        return jsonify({'error': 'provider not found'})
+
+    social_access_url = provider.generate_authorize_url()
+    return jsonify({'url': social_access_url})
+
+
+@app.route('/api/v1/callback/<provider_id>', methods=['GET'])
+def callback(provider_id):
+    provider = get_provider(provider_id)
+    return provider.authorize() if provider else jsonify({'error': 'provider not found'})

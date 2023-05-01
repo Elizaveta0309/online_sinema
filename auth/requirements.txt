@@ -21,4 +21,4 @@ opentelemetry-sdk==1.10.0
 opentelemetry-instrumentation-flask==0.29b1
 opentelemetry-exporter-jaeger==1.10.0
 Flask-Limiter==3.3.0
-
+Authlib==1.2.0

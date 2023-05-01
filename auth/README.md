@@ -9,7 +9,6 @@ docker exec -it auth bash
 Запустить создание таблиц базы данных
 
 ```
-alembic revision --autogenerate
 alembic upgrade head
 ```
 

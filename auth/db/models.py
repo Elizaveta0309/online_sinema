@@ -126,7 +126,7 @@ class RefreshToken(Base, Mixin):
 class AccountEntrance(Base, Mixin):
     __tablename__ = 'account_entrance'
 
-    user = Column(ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
+    user = Column(ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     entrance_date = Column(DateTime, nullable=False)
 
     def __init__(self, user, entrance_date):
@@ -135,3 +135,14 @@ class AccountEntrance(Base, Mixin):
 
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
+
+
+class UserSocial(Base, Mixin):
+    __tablename__ = 'user_social'
+
+    user = Column(ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    social_user_id = Column(String(255), nullable=False)
+
+    def __init__(self, user, social_user_id):
+        self.user = user
+        self.social_user_id = social_user_id
