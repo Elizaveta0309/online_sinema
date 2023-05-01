@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 from datetime import timezone
+from uuid import uuid4
 
 import bcrypt
 import jwt
@@ -33,3 +34,7 @@ def get_object_or_404(model, **kwargs):
     elif not result:
         raise Http404
     return result[0]
+
+
+def generate_random_password():
+    return str(uuid4())

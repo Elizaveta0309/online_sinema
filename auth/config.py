@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     SALT: bytes = b'$2b$12$PuxeYPUtTZ2bvJjWR0ZWVu'
     REQUEST_NUM_LIMIT: int = 100
     REQUEST_TIME_LIMIT: str = 'minute'
+    VK_AUTHORIZE_URL: str = 'https://oauth.vk.com/authorize'
+    VK_ACCESS_TOKEN_URL: str = 'https://oauth.vk.com/access_token'
+    VK_ACCESS_TOKEN: str = 'NgRvwx5YoYGauO39VANy'
+    VK_CLIENT_ID = '51629723'
+    OAUTH_REDIRECT_URI: str = 'http://3a17-46-138-168-89.ngrok-free.app/api/v1/callback'
 
     class Config:
         env_file = '.env'
