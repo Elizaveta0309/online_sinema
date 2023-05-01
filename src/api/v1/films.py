@@ -34,7 +34,7 @@ def premium_needed(func):
         role = token_decoded['role']
         film = await func(*args, **kwargs)
 
-        if film.imdb_rating >= 8 and role != 'subscriber':
+        if film.imdb_rating >= 8 and role not in {'admin', 'subscriber'}:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='subscription needed')
 
         return film
