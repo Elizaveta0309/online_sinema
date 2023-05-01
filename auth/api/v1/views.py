@@ -384,7 +384,7 @@ def oauth():
     provider_id = request.args.get('provider_id')
 
     if not provider_id:
-        return jsonify({'error': 'please provide social type'}), HTTPStatus.FORBIDDEN
+        return jsonify({'error': 'please provide provider type'}), HTTPStatus.FORBIDDEN
     provider = get_provider(provider_id)
 
     if not provider:
