@@ -8,8 +8,8 @@ from flask.views import MethodView
 from opentelemetry import trace
 
 from app import app
+from permissions import jwt_required, admin_required, is_not_logged_in
 from db.models import RefreshToken, Role, User
-from permissions import jwt_required, admin_required
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
@@ -22,8 +22,9 @@ tracer = trace.get_tracer(__name__)
 
 @injector.inject
 @app.route('/api/v1/login', methods=['POST'])
+@is_not_logged_in
 @swag_from('docs/login.yaml')
-def login(login_request: LoginRequest):
+def login(login_request: LoginRequest, blacklist: Blacklist):
     with tracer.start_as_current_span('login') as login:
 
         request_id = request.headers.get('X-Request-Id')

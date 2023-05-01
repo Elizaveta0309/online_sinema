@@ -56,3 +56,17 @@ def admin_required(f):
             return f(*args, **kwargs)
 
     return decorator
+
+def is_not_logged_in(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        with tracer.start_as_current_span('check_access_token'):
+
+            token = request.cookies.get('token')
+            blacklist = kwargs.get('blacklist')
+            if token and not blacklist.is_expired(token):
+                return jsonify({'error': 'user is already logged in'}), HTTPStatus.FORBIDDEN
+
+            return f(*args, **kwargs)
+
+    return decorator
