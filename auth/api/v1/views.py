@@ -26,7 +26,8 @@ tracer = trace.get_tracer(__name__)
 @swag_from('docs/login.yaml')
 def login(login_request: LoginRequest, blacklist: Blacklist):
     with tracer.start_as_current_span('login') as login:
-
+        ip_addr = request.remote_addr
+        user_agent = request.headers.get('User-Agent')
         request_id = request.headers.get('X-Request-Id')
         login.set_attribute('http.request_id', request_id)
 
@@ -42,7 +43,7 @@ def login(login_request: LoginRequest, blacklist: Blacklist):
             token, refresh = user.create_or_update_tokens()
 
         with tracer.start_as_current_span('save_account_entrance'):
-            user.create_account_entrance()
+            user.create_account_entrance(user_agent, ip_addr)
 
         response = jsonify({'info': 'ok', 'token': token, 'refresh': refresh})
         response.set_cookie('token', token)
