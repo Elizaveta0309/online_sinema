@@ -1,8 +1,7 @@
+from authlib.integrations.flask_client import OAuth
 from flasgger import Swagger
 from flask import Flask
-from authlib.integrations.flask_client import OAuth
 
-from config import settings
 from middleware import ExceptionHandlerMiddleware
 
 app = Flask(__name__)
@@ -11,7 +10,6 @@ app.wsgi_app = ExceptionHandlerMiddleware(app.wsgi_app)
 app.secret_key = 'asdasd'
 
 oauth = OAuth(app)
-
 
 # noinspection PyUnresolvedReferences
 from api.v1.views import *

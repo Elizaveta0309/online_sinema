@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 import requests
 from flask import jsonify, request
 
@@ -13,7 +15,7 @@ def get_social_access_url(social):
         return response.location
 
 
-class OAuthProvider:
+class OAuthProvider(ABC):
     def __init__(self, name, authorize_url, access_token_url, client_id, client_secret):
         self.name = name
         self.authorize_url = authorize_url
@@ -29,9 +31,11 @@ class OAuthProvider:
             client_secret=client_secret
         )
 
+    @abstractmethod
     def generate_authorize_url(self):
         ...
 
+    @abstractmethod
     def authorize(self):
         ...
 
@@ -50,6 +54,24 @@ class OAuthProviderVK(OAuthProvider):
         return f'{self.access_token_url}?client_id={self.client_id}' \
                f'&client_secret={settings.VK_ACCESS_TOKEN}&code={code}&redirect_uri={self.redirect_uri}'
 
+    @staticmethod
+    def get_or_create_user(social_user_id):
+        if user_social := UserSocial.query.filter_by(social_user_id=social_user_id).first():
+            user = User.query.filter_by(id=user_social.user).first()
+        else:
+            user = User.create(social_user_id, generate_random_password())
+            UserSocial.create(user=user.id, social_user_id=social_user_id)
+        return user
+
+    @staticmethod
+    def get_response(user):
+        token, refresh = user.create_or_update_tokens()
+        user.create_account_entrance()
+        response = jsonify({'info': 'ok'})
+        response.set_cookie('token', token)
+        response.set_cookie('refresh', refresh)
+        return response
+
     def authorize(self):
         code = request.args['code']
         url = self.get_access_token_url(code)
@@ -59,20 +81,9 @@ class OAuthProviderVK(OAuthProvider):
             return jsonify({'error': 'authorization error'})
 
         social_user_id = str(data['user_id'])
+        user = self.get_or_create_user(social_user_id)
 
-        if user_social := UserSocial.query.filter_by(social_user_id=social_user_id).first():
-            user = User.query.filter_by(id=user_social.user).first()
-        else:
-            user = User.create(social_user_id, generate_random_password())
-            UserSocial.create(user=user.id, social_user_id=social_user_id)
-
-        token, refresh = user.create_or_update_tokens()
-        user.create_account_entrance()
-        response = jsonify({'info': 'ok'})
-        response.set_cookie('token', token)
-        response.set_cookie('refresh', refresh)
-
-        return response
+        return self.get_response(user)
 
 
 vk_provider = OAuthProviderVK(
@@ -88,4 +99,7 @@ def get_provider(provider_id):
     providers = {
         'vk': vk_provider
     }
-    return providers[provider_id]
+    try:
+        return providers[provider_id]
+    except KeyError:
+        return

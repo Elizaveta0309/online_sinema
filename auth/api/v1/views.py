@@ -315,9 +315,14 @@ app.add_url_rule('/api/v1/roles/<role_id>',
 @app.route('/api/v1/oauth', methods=['GET'])
 def oauth():
     provider_id = request.args.get('provider_id')
+
     if not provider_id:
         return jsonify({'error': 'please provide social type'}), HTTPStatus.FORBIDDEN
     provider = get_provider(provider_id)
+
+    if not provider:
+        return jsonify({'error': 'provider not found'})
+
     social_access_url = provider.generate_authorize_url()
     return jsonify({'url': social_access_url})
 
@@ -325,4 +330,4 @@ def oauth():
 @app.route('/api/v1/callback/<provider_id>', methods=['GET'])
 def callback(provider_id):
     provider = get_provider(provider_id)
-    return provider.authorize()
+    return provider.authorize() if provider else jsonify({'error': 'provider not found'})
