@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from datetime import timezone
 
-from sqlalchemy import Column, String, ForeignKey, DateTime
+from sqlalchemy import Column, String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 
@@ -94,8 +94,13 @@ class User(Base, Mixin):
     def check_password(self, password):
         return encrypt_password(password) == self.password
 
-    def create_account_entrance(self):
-        entrance = AccountEntrance(user=self.id, entrance_date=datetime.now(timezone.utc))
+    def create_account_entrance(self, user_agent, ip_addr):
+        entrance = AccountEntrance(
+            user=self.id,
+            entrance_date=datetime.now(timezone.utc),
+            user_agent=user_agent,
+            ip_addr=ip_addr
+        )
         entrance.save()
 
     def create_or_update_tokens(self):
@@ -125,13 +130,23 @@ class RefreshToken(Base, Mixin):
 
 class AccountEntrance(Base, Mixin):
     __tablename__ = 'account_entrance'
+    __table_args__ = (
+        UniqueConstraint('id', 'user_agent'),
+        {
+            'postgresql_partition_by': 'LIST (user_agent)',
+        }
+    )
 
     user = Column(ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     entrance_date = Column(DateTime, nullable=False)
+    user_agent = Column(String(255), nullable=False)
+    ip_addr = Column(String(64), nullable=False)
 
-    def __init__(self, user, entrance_date):
+    def __init__(self, user, entrance_date, user_agent, ip_addr):
         self.user = user
         self.entrance_date = entrance_date
+        self.user_agent = user_agent
+        self.ip_addr = ip_addr
 
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
