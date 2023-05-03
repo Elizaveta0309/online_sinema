@@ -24,21 +24,21 @@ def configure_tracer() -> None:
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
-                agent_host_name='jaeger',
-                agent_port=6831
+                agent_host_name=settings.JAEGER_HOST,
+                agent_port=settings.JAEGER_PORT
             )
         )
     )
 
-
-configure_tracer()
 
 app = Flask(__name__)
 app.secret_key = settings.SECRET
 
 oauth = OAuth(app)
 
-FlaskInstrumentor().instrument_app(app)
+if settings.ENABLE_JAEGER_TRACER:
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
 
 limiter = Limiter(
     get_remote_address,

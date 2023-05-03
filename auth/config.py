@@ -2,6 +2,9 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
+    JAEGER_HOST: str = 'jaeger'
+    JAEGER_PORT: int = 6831
+    ENABLE_JAEGER_TRACER: bool = False
     POSTGRES_HOST: str = 'localhost'
     POSTGRES_PORT: int = 5433
     POSTGRES_USER: str = 'postgres-auth'
