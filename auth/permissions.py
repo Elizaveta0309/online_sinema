@@ -2,11 +2,10 @@ from functools import wraps
 from http import HTTPStatus
 
 from flask import jsonify, request
-from utils.utils import is_token_expired, jwt_decode
+from opentelemetry import trace
 
 from db.models import Role, User
-
-from opentelemetry import trace
+from utils.utils import is_token_expired, jwt_decode
 
 tracer = trace.get_tracer(__name__)
 
@@ -57,14 +56,15 @@ def admin_required(f):
 
     return decorator
 
+
 def is_not_logged_in(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         with tracer.start_as_current_span('check_access_token'):
-
             token = request.cookies.get('token')
+
             blacklist = kwargs.get('blacklist')
-            if token and not blacklist.is_expired(token):
+            if token and not is_token_expired(token) and not blacklist.is_expired(token):
                 return jsonify({'error': 'user is already logged in'}), HTTPStatus.FORBIDDEN
 
             return f(*args, **kwargs)

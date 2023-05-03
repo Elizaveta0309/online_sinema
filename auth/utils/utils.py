@@ -1,10 +1,8 @@
-import time
-from datetime import datetime
-from datetime import timezone
 from uuid import uuid4
 
 import bcrypt
 import jwt
+from jwt import ExpiredSignatureError, InvalidSignatureError
 from sqlalchemy.exc import MultipleResultsFound
 
 from config import settings
@@ -24,7 +22,21 @@ def jwt_decode(data):
 
 
 def is_token_expired(token):
-    return time.mktime(datetime.now(timezone.utc).timetuple()) > jwt_decode(token)['exp']
+    try:
+        jwt.decode(token, settings.SECRET, algorithms='HS256')
+        return False
+    except ExpiredSignatureError:
+        return True
+
+
+def is_token_valid(token):
+    try:
+        jwt.decode(token, settings.SECRET, algorithms='HS256')
+        return True
+    except InvalidSignatureError:
+        return False
+    except ExpiredSignatureError:
+        return True
 
 
 def get_object_or_404(model, **kwargs):

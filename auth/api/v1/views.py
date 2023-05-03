@@ -8,8 +8,8 @@ from flask.views import MethodView
 from opentelemetry import trace
 
 from app import app
-from permissions import jwt_required, admin_required, is_not_logged_in
 from db.models import RefreshToken, Role, User
+from permissions import jwt_required, admin_required, is_not_logged_in
 from providers import BlacklistModule, LoginRequestModule
 from schemas import RoleSchema, AccountEntranceSchema
 from services import LoginRequest
@@ -37,7 +37,7 @@ def login(login_request: LoginRequest, blacklist: Blacklist):
                 return jsonify({'error': 'not found'}), HTTPStatus.NOT_FOUND
 
             if not user.check_password(login_request.password):
-                return {'error': 'wrong password'}
+                return {'error': 'wrong password'}, HTTPStatus.FORBIDDEN
 
         with tracer.start_as_current_span('work_with_tokens'):
             token, refresh = user.create_or_update_tokens()
