@@ -43,7 +43,7 @@ def login(login_request: LoginRequest, blacklist: Blacklist):
             token, refresh = user.create_or_update_tokens()
 
         with tracer.start_as_current_span('save_account_entrance'):
-            user.create_account_entrance(user_agent, ip_addr)
+            user.create_account_entrance(user_agent, ip_addr, 'site')
 
         response = jsonify({'info': 'ok', 'token': token, 'refresh': refresh})
         response.set_cookie('token', token)

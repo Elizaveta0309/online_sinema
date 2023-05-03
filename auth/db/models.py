@@ -5,6 +5,7 @@ from datetime import timezone
 from sqlalchemy import Column, String, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
+from werkzeug.user_agent import UserAgent
 
 from config import settings
 from db.db import db_session, Base
@@ -12,7 +13,7 @@ from utils.utils import encrypt_password, jwt_encode
 
 
 class Mixin:
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
 
     def __init__(self, *args, **kwargs):
         ...
@@ -94,12 +95,29 @@ class User(Base, Mixin):
     def check_password(self, password):
         return encrypt_password(password) == self.password
 
-    def create_account_entrance(self, user_agent, ip_addr):
+    def create_account_entrance(self, user_agent, ip_addr, user_auth_service):
+        agent = UserAgent(user_agent)
+        platform = agent.platform
+
+        if platform and "windows" in platform.lower():
+            platform: str = "windows"
+        elif platform and "linux" in platform.lower():
+            platform: str = "linux"
+        elif platform and "macos" in platform.lower():
+            platform: str = "macos"
+        else:
+            platform: str = "other"
+
+        user_auth_service = user_auth_service if user_auth_service else AccountEntrance.DEFAULT_USER_AUTH_SERVICE
+
         entrance = AccountEntrance(
             user=self.id,
             entrance_date=datetime.now(timezone.utc),
             user_agent=user_agent,
-            ip_addr=ip_addr
+            ip_addr=ip_addr,
+            platform=platform,
+            user_auth_service=user_auth_service
+
         )
         entrance.save()
 
@@ -129,11 +147,14 @@ class RefreshToken(Base, Mixin):
 
 
 class AccountEntrance(Base, Mixin):
+    DEFAULT_PLATFORM = 'other'
+    DEFAULT_USER_AUTH_SERVICE = 'site'
+
     __tablename__ = 'account_entrance'
     __table_args__ = (
-        UniqueConstraint('id', 'user_agent'),
+        UniqueConstraint('id', 'platform'),
         {
-            'postgresql_partition_by': 'LIST (user_agent)',
+            'postgresql_partition_by': 'LIST (platform)',
         }
     )
 
@@ -141,12 +162,16 @@ class AccountEntrance(Base, Mixin):
     entrance_date = Column(DateTime, nullable=False)
     user_agent = Column(String(255), nullable=False)
     ip_addr = Column(String(64), nullable=False)
+    user_auth_service = Column(String(64), nullable=False)
+    platform = Column(String(64), nullable=False, primary_key=True)
 
-    def __init__(self, user, entrance_date, user_agent, ip_addr):
+    def __init__(self, user, entrance_date, user_agent, ip_addr, user_auth_service, platform):
         self.user = user
         self.entrance_date = entrance_date
         self.user_agent = user_agent
         self.ip_addr = ip_addr
+        self.user_auth_service = user_auth_service
+        self.platform = platform
 
     def __repr__(self):
         return f'<Entrance {self.entrance_date}>'
