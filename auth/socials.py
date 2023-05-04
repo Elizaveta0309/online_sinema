@@ -64,9 +64,12 @@ class OAuthProviderVK(OAuthProvider):
         return user
 
     @staticmethod
-    def get_response(user):
+    def get_response(user, request):
+        ip_addr = request.remote_addr
+        user_agent = request.headers.get('User-Agent')
+
         token, refresh = user.create_or_update_tokens()
-        user.create_account_entrance()
+        user.create_account_entrance(user_agent, ip_addr, 'vk')
         response = jsonify({'info': 'ok'})
         response.set_cookie('token', token)
         response.set_cookie('refresh', refresh)
@@ -83,7 +86,7 @@ class OAuthProviderVK(OAuthProvider):
         social_user_id = str(data['user_id'])
         user = self.get_or_create_user(social_user_id)
 
-        return self.get_response(user)
+        return self.get_response(user, request)
 
 
 vk_provider = OAuthProviderVK(
