@@ -3,7 +3,7 @@ version: '3.5'
 services:
   zookeeper:
     image: zookeeper:3.5
-    container_name: zookeeper_ch
+    container_name: zookeeper
     hostname: zookeeper
 
   clickhouse-node1:
@@ -45,6 +45,15 @@ services:
     depends_on:
       - zookeeper
 
+  init_db:
+    build: ./.
+    container_name: init_db
+    depends_on:
+      - zookeeper
+      - clickhouse-node1
+      - clickhouse-node2
+      - clickhouse-node3
+      - clickhouse-node4
 
 networks:
   default:
