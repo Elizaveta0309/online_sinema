@@ -25,7 +25,7 @@ def init_cluster(client: Client):
         """
         CREATE TABLE analysis.viewed_progress_repl ON CLUSTER 'company_cluster' (
             `user_id` String,
-            `movie_id` String,
+            `film_id` String,
             `viewed_frame` UInt64,
             `created_at` DateTime
         ) Engine = ReplicatedMergeTree('/clickhouse/tables/{cluster}/{shard}/table', '{replica}')
