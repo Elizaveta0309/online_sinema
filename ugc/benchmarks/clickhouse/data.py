@@ -28,7 +28,7 @@ def main():
             try:
                 client.execute('INSERT INTO analysis.viewed_progress VALUES', values)
             except clickhouse_driver.errors.Error as e:
-                print(f'Ошибка при записи в КХ: ({e.code}) {e.message}')
+                print(f'Error: ({e.code}) {e.message}')
             finally:
                 values = []
 
