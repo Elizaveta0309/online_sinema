@@ -24,7 +24,6 @@ def check_kafka_topics(c: Consumer):
         break
     
     logger.info('[Kafka]: Healthcheck complete.')
-    c.close()
     
 
 

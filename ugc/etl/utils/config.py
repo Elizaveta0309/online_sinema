@@ -18,4 +18,5 @@ class KafkaAdminSettings(BaseSettings):
 
 
 class ETLSettings(BaseSettings):
-    batch_size: int = Field(default=1000, env='KAFKA_ETL_BATCH_SIZE')
+    batch_size: int = Field(default=1000, env='ETL_BATCH_SIZE')
+    refresh_time: int = Field(default=5, env='ETL_REFRESH_TIME')
