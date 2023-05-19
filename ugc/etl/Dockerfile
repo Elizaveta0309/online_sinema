@@ -1,0 +1,17 @@
+FROM python:3.10.7-slim
+
+WORKDIR /opt/etl
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get install -y netcat
+
+COPY requirements.txt requirements.txt
+
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt --no-cache-dir
+
+COPY . .
+
+ENTRYPOINT ["python main.py"]
