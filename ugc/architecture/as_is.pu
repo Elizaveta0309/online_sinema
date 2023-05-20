@@ -1,7 +1,7 @@
 @startuml
 skinparam componentStyle uml2
-actor Client #line:red
-component "Admin\nService" as AdminService #line:orange
+actor Client #line:black
+component "Administration\nService" as AdminService #line:orange
 component "ETL\nPostgres\nto Elastic" as ETL_PG_ES #line:blue
 component "Movies\nService" as Movies
 component "Auth\nService" as Auth #line:green
@@ -11,19 +11,20 @@ database Redis
 database Elastic
 
 
-Client -[#purple]> Auth: "Аутентификация / Регистрация\nклиента"
-Auth -[#violet]-> Postgres: "Сохранение клиента в базу"
-Auth -[#fuchia]> Client: "Access и Refresh токены"
-Auth -[#eggplant]> Redis: "Сохранение 'истекших'\n Refresh токенов"
+Client -[#green]> Auth: "Аутентификация / Регистрация\nклиента"
+Auth -[#green]-> Postgres: "Сохранение клиента в базу"
+Auth -[#green]> Client: "Access и Refresh токены"
+Auth -[#green]> Redis: "Сохранение истекших\nRefresh токенов"
 
 Client --> Movies: "Запрос контента"
 Client <-- Movies: "Получение контента"
+Movies -> Auth: "Проверка токена\nи прав пользователя"
 Movies --> Redis: "Сохранение / проверка кэша"
 Movies --> Elastic: "Запрос данных"
 
-Postgres <-[#salmon]- ETL_PG_ES: "Запрос новых / обновлённых данных"
-Redis <-[#salmon]- ETL_PG_ES : "Сохранение состояния"
-ETL_PG_ES -[#salmon]-> Elastic: "Загрузка новых / обновлённых данных"
+Postgres <-[#blue]- ETL_PG_ES: "Запрос новых / обновлённых данных"
+Redis <-[#blue]- ETL_PG_ES : "Сохранение состояния"
+ETL_PG_ES -[#blue]-> Elastic: "Загрузка новых / обновлённых данных"
 
-Postgres <-[#green] AdminService: "Загрузка контента в базу"
+Postgres <-[#orange] AdminService: "Загрузка контента в базу"
 @enduml
