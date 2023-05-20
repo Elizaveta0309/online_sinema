@@ -14,4 +14,4 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-ENTRYPOINT ["python main.py"]
+CMD python main.py

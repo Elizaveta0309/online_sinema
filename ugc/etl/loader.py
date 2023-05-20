@@ -1,26 +1,26 @@
-from ast import List
-import logging
+from typing import List
+from logging import Logger
 from clickhouse_driver import Client
 from clickhouse_driver.errors import Error as ClickHouseError
+from pydantic import BaseModel
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class BaseDatabaseLoader:
     def load(self) -> None:
         pass
 
 class ClickHouseLoader(BaseDatabaseLoader):
-    QUERY = "INSERT INTO viewed_progress (user_id, film_id, viewed_frame, created_at) VALUES (%s, %s, %s, %s);"
-    def __init__(self, client: Client) -> None:
+    QUERY = "INSERT INTO analysis.viewed_progress (user_id, film_id, viewed_frame, created_at) VALUES"
+    def __init__(self, client: Client, logger: Logger) -> None:
         self.client = client
+        self.logger = logger
     
-    def load(self, data) -> None:
+    def load(self, data: List[BaseModel]) -> None:
         parsed_input = [dict(row) for row in data]
         try:
-            print('Started loading')
+            self.logger.info('[Clickhouse]: Started loading')
             self.client.execute(self.QUERY, parsed_input)
-            logger.debug(f'[ClickHouse]: Uploaded {len(data)} messages.')
+            self.logger.debug(f'[ClickHouse]: Uploaded {len(data)} messages.')
         except ClickHouseError as e:
-            logger.exception(f'[ClickHouse]: Error while uploading messages: {e}')
-        print('Loaded')
+            self.logger.exception(f'[ClickHouse]: Error while uploading messages: {e}')
+        self.logger.info('[Clickhouse]: Loaded batch.')
