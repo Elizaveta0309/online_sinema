@@ -1,9 +1,9 @@
 version: '3.5'
 
 services:
-  zookeeper:
+  ch_zookeeper:
     image: zookeeper:3.5
-    container_name: zookeeper
+    container_name: ch_zookeeper
     hostname: zookeeper
 
   clickhouse-node1:
@@ -16,7 +16,7 @@ services:
     volumes:
       - ./data/node1:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - ch_zookeeper
 
   clickhouse-node2:
     image: yandex/clickhouse-server:20.4
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./data/node2:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - ch_zookeeper
 
   clickhouse-node3:
     image: yandex/clickhouse-server:20.4
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./data/node3:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - ch_zookeeper
 
   clickhouse-node4:
     image: yandex/clickhouse-server:20.4
@@ -43,13 +43,13 @@ services:
     volumes:
       - ./data/node4:/etc/clickhouse-server
     depends_on:
-      - zookeeper
+      - ch_zookeeper
 
   init_db:
     build: ./.
     container_name: init_db
     depends_on:
-      - zookeeper
+      - ch_zookeeper
       - clickhouse-node1
       - clickhouse-node2
       - clickhouse-node3
