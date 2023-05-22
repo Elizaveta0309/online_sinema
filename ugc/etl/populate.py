@@ -6,7 +6,7 @@ import json
 
 p = Producer({'bootstrap.servers': 'localhost:9092'})
 
-for _ in range(10):
+for _ in range(150):
     data = {
         'user_id': uuid4().hex,
         'film_id': uuid4().hex,
