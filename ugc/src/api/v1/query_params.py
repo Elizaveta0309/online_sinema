@@ -1,10 +1,11 @@
 from fastapi import Query
 
+
 class TimeCodeParams:
     def __init__(
             self,
             user_id: str = Query(
-                default = 'user_id_for_example',
+                default='user_id_for_example',
                 description='User ID',
             ),
             film_id: str = Query(
@@ -13,8 +14,8 @@ class TimeCodeParams:
             ),
             viewed_frame: int = Query(
                 default=1,
-                description='Amount viewed seconds of the film',
-                ge = 1,
+                description='Number of the last viewed second of the film',
+                ge=1,
             )
     ):
         self.user_id = user_id
