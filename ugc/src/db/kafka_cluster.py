@@ -1,7 +1,6 @@
-from kafka import KafkaProducer
+from aiokafka import AIOKafkaProducer
 
-
-producer = KafkaProducer(bootstrap_servers=['broker:29092'])
+producer: AIOKafkaProducer | None = None
 
 
 class AsyncKafkaProducer:
@@ -9,7 +8,7 @@ class AsyncKafkaProducer:
         self.producer = producer
 
     async def send(self, user_id, film_id, viewed_frame):
-        self.producer.send(
+        self.producer.send_and_wait(
             topic='views',
             value=str(viewed_frame).encode('utf-8'),
             key=(user_id + "+" + film_id).encode('utf-8')
