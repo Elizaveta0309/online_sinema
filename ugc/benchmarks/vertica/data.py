@@ -10,7 +10,6 @@ dns = {
     'user': 'dbadmin',
     'password': '',
     'database': 'docker',
-    'autocommit': False,
     'use_prepared_statements': True,
 }
 
@@ -33,14 +32,18 @@ def database(dns):
 
 
 def generate_line() -> tuple:
-    line = (random.choice(user_ids), random.choice(movie_ids), random.randint(1, 180), datetime.now())
-    return line
+    return (
+        random.choice(user_ids),
+        random.choice(movie_ids),
+        random.randint(1, 180),
+        datetime.now(),
+    )
 
 
 def insert_line(x):
     connect = vertica_python.connect(**dns)
     cursor = connect.cursor()
-    values = [generate_line() for i in range(1000)]
+    values = [generate_line() for _ in range(1000)]
     start = time.time()
     try:
         cursor.executemany(
