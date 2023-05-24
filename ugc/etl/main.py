@@ -32,7 +32,7 @@ if __name__ == '__main__':
     logger.info('[Main]: Initializing...')
 
     c = Consumer({
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': kafka_config.bootstrap_servers,
         'group.id': kafka_config.group_id,
         'auto.offset.reset': kafka_config.offset
     })

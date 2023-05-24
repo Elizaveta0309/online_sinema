@@ -1,7 +1,8 @@
 from kafka import KafkaProducer
+from src.config import settings
 
 
-producer = KafkaProducer(bootstrap_servers=['broker:29092'])
+producer = KafkaProducer(bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS)
 
 
 class AsyncKafkaProducer:
@@ -12,7 +13,7 @@ class AsyncKafkaProducer:
         self.producer.send(
             topic='views',
             value=str(viewed_frame).encode('utf-8'),
-            key=(user_id + "+" + film_id).encode('utf-8')
+            key=f"{user_id}+{film_id}".encode('utf-8'),
         )
 
 
