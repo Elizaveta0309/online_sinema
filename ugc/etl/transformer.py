@@ -8,12 +8,12 @@ class BaseTransformer:
     def __init__(self, target_model: BaseModel, logger: Logger) -> None:
         self.target_model = target_model
         self.logger = logger
-    def transform(self, data: Iterator[Any]) -> List[Any]:
+    def transform(self, data: List[Any]) -> List[Any]:
         pass
 
 
 class KafkaTransformer(BaseTransformer):
-    def transform(self, data: Iterator[Any]) -> List[Any]:
+    def transform(self, data: List[Any]) -> List[Any]:
         res = []
         for record in data:
             try:

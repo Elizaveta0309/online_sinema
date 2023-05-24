@@ -44,8 +44,8 @@ if __name__ == '__main__':
     )
     logger.info('[Main]: Connected to ClickHouse')
 
-    check_clickhouse_inited(ch)
-    #check_kafka_topics(c)
+    check_clickhouse_inited(ch, logger)
+    #check_kafka_topics(c, logger)
     
     registry = DictOffsetRegistry()
     extractor = KafkaBroker(
@@ -70,4 +70,4 @@ if __name__ == '__main__':
         logger=logger
     )
 
-    etl.start()
+    etl.start(50)

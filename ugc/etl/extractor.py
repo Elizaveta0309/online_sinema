@@ -23,10 +23,12 @@ class KafkaBroker(BaseMessageBroker):
             msg = self.consumer.poll(1.0)
             if msg is None:
                 self.logger.error('[Kafka]: No messages.')
-                raise NoMessagesException
+                self.logger.info(f'[Kafka]: Consumed a batch of {len(batch)}')
+                yield batch
             elif msg.error():
                 self.logger.error(f'[Kafka]: Error while consuming messages: {msg.error()}')
-                raise ConsumingMessagesException
+                self.logger.info(f'[Kafka]: Consumed a batch of {len(batch)}')
+                yield batch
             else:
                 self.offset_registry.update(
                     partition=msg.partition(),
@@ -36,4 +38,4 @@ class KafkaBroker(BaseMessageBroker):
                 batch.append(msg.value())
 
         self.logger.info(f'[Kafka]: Consumed a batch of {len(batch)}')
-        return batch
+        yield batch

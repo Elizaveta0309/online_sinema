@@ -40,6 +40,12 @@ services:
         CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
         CONFLUENT_METRICS_ENABLE: 'true'
         CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+      healthcheck:
+        test: nc -z localhost 9092 || exit -1
+        start_period: 15s
+        interval: 5s
+        timeout: 10s
+        retries: 10
 
 
   schema-registry:
@@ -238,3 +244,14 @@ services:
       - clickhouse-node2
       - clickhouse-node3
       - clickhouse-node4
+
+  etl_process:
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    container_name: etl_process
+    env_file:
+      - ./etl/.env
+    depends_on:
+      - init_db
+      - broker
