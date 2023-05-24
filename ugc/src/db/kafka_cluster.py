@@ -11,7 +11,7 @@ class AsyncKafkaProducer:
         self.producer.send_and_wait(
             topic='views',
             value=str(viewed_frame).encode('utf-8'),
-            key=(user_id + "+" + film_id).encode('utf-8')
+            key=f"{user_id}+{film_id}".encode('utf-8'),
         )
 
 
