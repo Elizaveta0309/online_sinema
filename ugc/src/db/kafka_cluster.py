@@ -1,7 +1,10 @@
 from aiokafka import AIOKafkaProducer
 
 producer: AIOKafkaProducer | None = None
+# from src.config import settings
 
+
+# producer = KafkaProducer(bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS)
 
 class AsyncKafkaProducer:
     def __init__(self, producer):
