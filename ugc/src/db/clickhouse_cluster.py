@@ -22,14 +22,13 @@ class AsyncClickhouseClient:
         self.client = client
 
     async def get(self, user_id, film_id):
-        last_viewed_second = self.client.execute(
+        return self.client.execute(
             """
                     SELECT 'viewed_frame' FROM analysis.viewed_progress
                     WHERE user_id=%(user_id)s and film_id=%(film_id)s;
-            
             """,
-            {'user-id': user_id, 'film_id': film_id})
-        return last_viewed_second
+            {'user-id': user_id, 'film_id': film_id},
+        )
 
 
 async def get_clickhouse() -> AsyncClickhouseClient:

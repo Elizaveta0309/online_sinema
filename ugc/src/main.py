@@ -25,7 +25,9 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    kafka_cluster.producer = AIOKafkaProducer(bootstrap_servers=['broker:29092'])
+    kafka_cluster.producer = AIOKafkaProducer(
+        bootstrap_servers=['broker:29092']
+    )
     await kafka_cluster.producer.start()
 
 
@@ -36,5 +38,9 @@ async def shutdown():
 
 # Подключаем роутер к серверу, указав префикс /v1/time_code
 # Теги указываем для удобства навигации по документации
-app.include_router(time_code.router, prefix='/api/v1/time_code', tags=['time_code'])
+app.include_router(
+    time_code.router,
+    prefix='/api/v1/time_code',
+    tags=['time_code']
+)
 app.include_router(likes.router, prefix="/api/v1/likes", tags=["likes"])

@@ -14,7 +14,11 @@ class TimeCodeService:
         self.client = client
 
     async def set_time_code(self, params: TimeCodeParams):
-        await self.producer.send(params.user_id, params.film_id, params.viewed_frame)
+        await self.producer.send(
+            params.user_id,
+            params.film_id,
+            params.viewed_frame
+        )
         sleep(1)
 
     async def get_time_code(self, user_id: str, film_id: str):

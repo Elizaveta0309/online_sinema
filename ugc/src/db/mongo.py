@@ -1,12 +1,17 @@
 """Mongo DB adapter."""
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection, AsyncIOMotorCursor
+from motor.motor_asyncio import (AsyncIOMotorClient,
+                                 AsyncIOMotorCollection,
+                                 AsyncIOMotorCursor)
 
 from src.config import settings
 
 
 class Mongo:
     def __init__(self) -> None:
-        self.client = AsyncIOMotorClient(settings.MONGO_HOST, settings.MONGO_PORT)
+        self.client = AsyncIOMotorClient(
+            settings.MONGO_HOST,
+            settings.MONGO_PORT
+        )
         self.db = self.client[settings.MONGO_DB]
 
     def _get_collection(self, collection_name: str) -> AsyncIOMotorCollection:
