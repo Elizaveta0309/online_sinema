@@ -34,7 +34,7 @@ jobs:
 
     - name: Lint with wemake-python-styleguide
       run: |
-        flake8 . --exit-zero --format=html --htmldir=reports/flake/
+        flake8 ugc --exit-zero --format=html --htmldir=reports/flake/
     - name: Check with mypy
       run: |
         mypy ugc --ignore-missing-imports --html-report reports/mypy/
