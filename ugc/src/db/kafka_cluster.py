@@ -1,6 +1,6 @@
 from aiokafka import AIOKafkaProducer
 
-producer: AIOKafkaProducer | None = None
+producer: AIOKafkaProducer = None
 # from src.config import settings
 
 

@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = 'postgres'
     POSTGRES_DB: str = 'postgres'
     ES_HOST: str = 'localhost'
-    ES_PORT: str = 9200
+    ES_PORT: int = 9200
     REDIS_HOST: str = 'localhost'
-    REDIS_PORT: str = 6379
+    REDIS_PORT: int = 6379
     PAGE_SIZE = 20
     CACHE_EXPIRE_IN_SECONDS = 60 * 5
     PROJECT_NAME = 'Movies'
