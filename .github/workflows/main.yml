@@ -36,7 +36,7 @@ jobs:
         flake8 ugc --exit-zero --format=html --htmldir=reports/flake/
     - name: Lint with mypy
       run: |
-        mypy ugc --html-report reports/mypy/ --namespace-packages -p elk
+        mypy --html-report reports/mypy/ --namespace-packages ugc
 
     - name: Upload reports
       uses: actions/upload-artifact@v2
