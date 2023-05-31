@@ -2,6 +2,8 @@ name: UGC_2
 on:
   push:
     branches: [ "main" ]
+    path:
+      - 'ugc/**'
   pull_request:
     branches: [ "main" ]
 
