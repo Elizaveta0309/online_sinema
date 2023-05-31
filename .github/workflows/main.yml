@@ -33,10 +33,10 @@ jobs:
 
     - name: Lint with wemake-python-styleguide
       run: |
-        flake8 ugc --ignore=D100,D103,D104 --format=html --htmldir=reports/flake/
+        flake8 ugc --format=html --htmldir=reports/flake/
     - name: Check with mypy
       run: |
-        mypy ugc --ignore-missing-imports --html-report reports/mypy/
+        mypy ugc --html-report reports/mypy/
     - name: Upload reports
       uses: actions/upload-artifact@v2
       with:
