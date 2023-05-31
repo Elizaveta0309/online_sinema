@@ -51,3 +51,5 @@ def generate_batch(attribute: Callable, users_number: int, batch_size: int):
 
 def generate_users_batch(attribute: Callable, users: list, batch_size: int):
     return [attribute(user_id=choice(users)) for _ in range(batch_size)]
+
+
