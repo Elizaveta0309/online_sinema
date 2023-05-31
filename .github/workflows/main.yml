@@ -36,7 +36,7 @@ jobs:
         flake8 . --exit-zero --format=html --htmldir=reports/flake/
     - name: Lint with mypy
       run: |
-        mypy --html-report reports/mypy/ --namespace-packages -p ELK--ignore-missing-imports
+        mypy --html-report reports/mypy/ --namespace-packages 
 
     - name: Upload reports
       uses: actions/upload-artifact@v2
