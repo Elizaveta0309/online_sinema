@@ -1,0 +1,42 @@
+version: '2.2'
+services:
+  logstash:
+    image: logstash:7.10.1
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ES_HOST: "elasticsearch:9200"
+    ports:
+      - "5044:5044/udp"
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./deploy/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+
+  filebeat:
+    image: elastic/filebeat:7.17.5
+    volumes:
+      - /tmp/logs/nginx:/var/log/nginx:ro
+      - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+
+    links:
+      - logstash
+
+  elasticsearch:
+    image: elasticsearch:7.17.5
+    environment:
+
+      - discovery.type=single-node
+
+      - "ES_JAVA_OPTS=-Xms200m -Xmx200m"
+    ports:
+      - 9200:9200
+    volumes:
+      - /tmp/esdata:/tmp/elasticsearch/data
+
+  kibana:
+    image: kibana:7.17.5
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
