@@ -2,10 +2,12 @@ name: UGC_2
 on:
   push:
     branches: [ "main" ]
-    path:
+    paths:
       - 'ugc/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'ugc/**'
 
 jobs:
   build:
