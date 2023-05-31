@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter
 
@@ -8,7 +8,7 @@ from src.services import like_service
 router = APIRouter()
 
 
-@router.get('/{user_id}', response_model=list[Like])
+@router.get('/{user_id}', response_model= List[Like])
 async def get_likes(
         user_id: str,
         limit: int = 10,

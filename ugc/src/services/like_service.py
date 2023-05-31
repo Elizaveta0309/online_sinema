@@ -1,6 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import HTTPException
 
@@ -15,7 +15,7 @@ async def get_likes(
         user_id: str,
         limit: int = settings.LIMIT,
         offset: int = settings.OFFSET,
-) -> list[Like]:
+) -> List[Like]:
     data = await mongo.find(
         settings.LIKE,
         {'user_id': user_id},
