@@ -4,9 +4,9 @@ from typing import Optional
 
 from fastapi import HTTPException
 
-from ugc_mongo.src.core.config import settings
-from ugc_mongo.src.db.mongo import Mongo
-from ugc_mongo.src.models.like import Like
+from ugc.src.config import settings
+from ugc.src.db.mongo import Mongo
+from ugc.src.models.like import Like
 
 mongo = Mongo()
 
