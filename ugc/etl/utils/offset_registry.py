@@ -1,3 +1,6 @@
+from typing import Dict
+
+
 class BaseOffsetRegistry():
     def update(self, topic: str, partition: str, offset: str) -> None:
         pass
@@ -8,7 +11,7 @@ class DictOffsetRegistry(BaseOffsetRegistry):
     или удаления сообщений при чтении.
     """
     def __init__(self) -> None:
-        self.__registry = {}
+        self.__registry:Dict = {}
     
     def update(self, topic: str, partition: str, offset: str) -> None:
         if topic not in self.__registry:
