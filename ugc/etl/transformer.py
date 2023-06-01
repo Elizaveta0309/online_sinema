@@ -9,11 +9,11 @@ class BaseTransformer:
         self.target_model = target_model
         self.logger = logger
     def transform(self, data: List[Any]) -> Optional[List[Any]]:
-        return
+        return None
 
 
 class KafkaTransformer(BaseTransformer):
-    def transform(self, data: List[Any]) -> List[Any]:
+    def transform(self, data: List[Any]) -> Optional[List[Any]]:
         res = []
         for record in data:
             try:

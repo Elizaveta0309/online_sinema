@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Iterator, Any, List
+from typing import Iterator, Any, List, Optional
 
 from confluent_kafka import Consumer
 from utils.offset_registry import BaseOffsetRegistry
@@ -7,8 +7,8 @@ from utils.exceptions import NoMessagesException, ConsumingMessagesException
 from utils.backoff import backoff
 
 class BaseMessageBroker:
-    def extract(self, batch_size: int) -> Iterator[Any]:
-        pass
+    def extract(self, batch_size: int) -> Optional[Iterator[Any]]:
+        return None
 
 class KafkaBroker(BaseMessageBroker):
     def __init__(self, consumer: Consumer, offset_registry: BaseOffsetRegistry, logger: Logger) -> None:
@@ -17,7 +17,7 @@ class KafkaBroker(BaseMessageBroker):
         self.logger = logger
     
     @backoff()
-    def extract(self, batch_size: int = 10000) -> List[Any]:
+    def extract(self, batch_size: int = 10000) -> Optional[List[Any]]:
         batch = []
         for _ in range(batch_size):
             msg = self.consumer.poll(1.0)
