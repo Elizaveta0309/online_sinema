@@ -17,8 +17,8 @@ class KafkaBroker(BaseMessageBroker):
         self.logger = logger
     
     @backoff()
-    def extract(self, batch_size: int = 10000) -> Optional[List[Any]]:
-        batch = []
+    def extract(self, batch_size: int = 10000) -> Optional[Iterator[Any]]:
+        batch: List = []
         for _ in range(batch_size):
             msg = self.consumer.poll(1.0)
             if msg is None:
