@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class BaseDatabaseLoader:
-    def load(self) -> None:
+    def load(self, data: List[BaseModel]) -> None:
         pass
 
 class ClickHouseLoader(BaseDatabaseLoader):
