@@ -1,6 +1,6 @@
 from fastapi import Depends
 from time import sleep
-from src.api.v1.query_params import TimeCodeParams
+from src.api.v1.params_for_query import TimeCodeParams
 from src.db.kafka_cluster import get_kafka
 from src.db.clickhouse_cluster import get_clickhouse
 from kafka import KafkaProducer

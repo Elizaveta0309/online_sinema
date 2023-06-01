@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from .query_params import TimeCodeParams
+from .params_for_query import TimeCodeParams
 from src.services.time_code import TimeCodeService, get_time_code_service
 from src.api.permission import check_permission
 
