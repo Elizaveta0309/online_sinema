@@ -37,7 +37,7 @@ def check_clickhouse_inited(c: Client, logger: Logger):
             continue
         logger.info('[Clickhouse]: Found DB.')
 
-        c.execute(f"USE analysis")
+        c.execute("USE analysis")
 
         tables = c.execute("SHOW TABLES")
 
@@ -47,7 +47,7 @@ def check_clickhouse_inited(c: Client, logger: Logger):
             )
             continue
         logger.info('[Clickhouse]: Found table.')
-        
+
         logger.info('[ClickHouse]: Healthcheck complete.')
         c.disconnect()
         break

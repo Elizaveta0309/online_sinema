@@ -23,12 +23,12 @@ class ETL:
         self.batch_size = batch_size
         self.refresh_time = refresh_time
         self.logger = logger
-    
+
     def start(self, batch_size: int = 1000):
         while True:
-            self.logger.info(f'[ETL]: Started processing batch.')
+            self.logger.info('[ETL]: Started processing batch.')
             start_time = time.time()
-            
+
             raw_data = self.extractor.extract(batch_size)
 
             for data in raw_data:

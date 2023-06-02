@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Iterator, Any, List, Optional
+from typing import Iterator, Any, List, Optional, Generator
 
 from confluent_kafka import Consumer
 from utils.offset_registry import BaseOffsetRegistry
@@ -15,7 +15,7 @@ class KafkaBroker(BaseMessageBroker):
         self.consumer = consumer
         self.offset_registry = offset_registry
         self.logger = logger
-    
+
     @backoff()
     def extract(self, batch_size: int = 10000) -> Optional[Iterator[Any]]:
         batch: List = []

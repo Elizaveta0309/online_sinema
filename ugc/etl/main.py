@@ -2,7 +2,7 @@ from clickhouse_driver import Client
 from utils.log import setup_logger
 from pre_start import check_kafka_topics, check_clickhouse_inited
 from confluent_kafka import Consumer
-from ugc.etl import ETL
+from etl import ETL
 import logging
 
 from utils.offset_registry import DictOffsetRegistry
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         name=__name__,
         debug=etl_config.debug
     )
-    
+
     logger.info('[Main]: Initializing...')
 
     c = Consumer({
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     check_clickhouse_inited(ch, logger)
     #check_kafka_topics(c, logger)
-    
+
     registry = DictOffsetRegistry()
     extractor = KafkaBroker(
         consumer=c,
