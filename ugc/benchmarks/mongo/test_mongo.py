@@ -41,14 +41,22 @@ def test_patch(faker: Callable, collection_name: str) -> None:
         patch_step(faker, collection_name, batch_size)
 
 
-def test_reading(faker: Callable, collection_name: str, users_size: int) -> None:
+def test_reading(
+    faker: Callable,
+    collection_name: str,
+    users_size: int
+) -> None:
     result = []
     collection = mongo_db.get_collection(collection_name)
     users = [str(uuid4()) for _ in range(users_size)]
 
     for i in range(0, settings.RECORDS_SIZE, settings.BATCH_SIZE):
         print(i)
-        batch = generate_users_batch(faker, users, batch_size=settings.BATCH_SIZE)
+        batch = generate_users_batch(
+            faker,
+            users,
+            batch_size=settings.BATCH_SIZE
+        )
         collection.insert_many(batch)
 
     for user in users:
@@ -58,7 +66,7 @@ def test_reading(faker: Callable, collection_name: str, users_size: int) -> None
 
     avr_batch = sum(result) / len(result)
     print(
-        f"Results for {collection_name} for ~{int(settings.RECORDS_SIZE/users_size)} records: {avr_batch} sec.",
+        f"Results for{collection_name} for ~{int(settings.RECORDS_SIZE/users_size)} records: {avr_batch} sec.",
     )
 
 

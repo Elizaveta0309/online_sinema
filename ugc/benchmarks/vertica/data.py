@@ -47,7 +47,7 @@ def insert_line(x):
     start = time.time()
     try:
         cursor.executemany(
-            'INSERT INTO views (user_id, movie_id, viewed_frame, event_time) VALUES (?,?,?,?)', values)
+            'INSERT INTO views(user_id, movie_id, viewed_frame, event_time) VALUES (?,?,?,?)', values)
     except Exception as e:
         raise e
     cursor.close()

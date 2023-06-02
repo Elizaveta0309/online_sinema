@@ -2,8 +2,8 @@ from typing import Any, List
 
 from fastapi import APIRouter
 
-from src.models.like import Like
-from src.services import like_service
+from ugc.src.models.like import Like
+from ugc.src.services import like_service
 
 router = APIRouter()
 

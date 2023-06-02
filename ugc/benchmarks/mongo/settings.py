@@ -6,9 +6,9 @@ load_dotenv()
 
 class ResearchSettings(BaseSettings):
 
-    MONGO_HOST: str = Field('127.0.0.1', env = 'MONGO_HOST')
-    MONGO_PORT: int = Field(27017, env = 'MONGO_PORT')
-    MONGO_DB: str = Field('ugc_db', env = 'MONGO_DB')
+    MONGO_HOST: str = Field('127.0.0.1', env='MONGO_HOST')
+    MONGO_PORT: int = Field(27017, env='MONGO_PORT')
+    MONGO_DB: str = Field('ugc_db', env='MONGO_DB')
     LIKES = 'likedfilms'
     REVIEW = 'reviews'
     BOOKMARK = 'bookmarks'

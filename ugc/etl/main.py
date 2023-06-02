@@ -2,7 +2,7 @@ from clickhouse_driver import Client
 from utils.log import setup_logger
 from pre_start import check_kafka_topics, check_clickhouse_inited
 from confluent_kafka import Consumer
-from etl import ETL
+from ugc.etl import ETL
 import logging
 
 from utils.offset_registry import DictOffsetRegistry

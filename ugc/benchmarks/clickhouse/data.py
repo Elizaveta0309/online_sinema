@@ -26,7 +26,9 @@ def main():
 
         if len(values) >= 1000:
             try:
-                client.execute('INSERT INTO analysis.viewed_progress VALUES', values)
+                client.execute(
+                    'INSERT INTO analysis.viewed_progress VALUES', values
+                )
             except clickhouse_driver.errors.Error as e:
                 print(f'Error: ({e.code}) {e.message}')
             finally:
