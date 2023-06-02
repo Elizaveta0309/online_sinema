@@ -2,7 +2,7 @@ from clickhouse_driver import Client
 from utils.log import setup_logger
 from pre_start import check_clickhouse_inited
 from confluent_kafka import Consumer
-from etl import ETL
+from etl.etl import ETL
 
 from utils.offset_registry import DictOffsetRegistry
 from extractor import KafkaBroker
