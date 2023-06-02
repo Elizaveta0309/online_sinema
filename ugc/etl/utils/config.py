@@ -11,7 +11,10 @@ class ClickHouseSettings(BaseSettings):
 
 
 class KafkaAdminSettings(BaseSettings):
-    bootstrap_servers: str = Field(default='localhost:9092', env='KAFKA_BS_SERVERS')
+    bootstrap_servers: str = Field(
+        default='localhost:9092',
+        env='KAFKA_BS_SERVERS'
+    )
     offset: str = Field(default='earliset', env='KAFKA_AUTO_OFFSET_RESET')
     group_id: str = Field(..., env='KAFKA_GROUP_ID')
     topics: str = Field(..., env='KAFKA_TOPICS')

@@ -8,7 +8,7 @@ producer: AIOKafkaProducer = None
 
 class AsyncKafkaProducer:
     def __init__(self, producer):
-        self.producer =  producer
+        self.producer = producer
 
     async def send(self, user_id, film_id, viewed_frame):
         self.producer.send_and_wait(

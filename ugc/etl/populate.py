@@ -10,7 +10,7 @@ for _ in range(150):
     data = {
         'user_id': uuid4().hex,
         'film_id': uuid4().hex,
-        'viewed_frame': randint(0,500),
+        'viewed_frame': randint(0, 500),
         'created_at': datetime.now().isoformat()
     }
     p.produce('views', json.dumps(data).encode('utf-8'))

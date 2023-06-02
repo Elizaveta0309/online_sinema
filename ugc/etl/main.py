@@ -1,9 +1,8 @@
 from clickhouse_driver import Client
 from utils.log import setup_logger
-from pre_start import check_kafka_topics, check_clickhouse_inited
+from pre_start import check_clickhouse_inited
 from confluent_kafka import Consumer
 from etl import ETL
-import logging
 
 from utils.offset_registry import DictOffsetRegistry
 from extractor import KafkaBroker
@@ -45,7 +44,6 @@ if __name__ == '__main__':
     logger.info('[Main]: Connected to ClickHouse')
 
     check_clickhouse_inited(ch, logger)
-    #check_kafka_topics(c, logger)
 
     registry = DictOffsetRegistry()
     extractor = KafkaBroker(

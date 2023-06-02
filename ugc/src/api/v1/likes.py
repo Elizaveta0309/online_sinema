@@ -8,13 +8,16 @@ from ugc.src.services import like_service
 router = APIRouter()
 
 
-@router.get('/{user_id}', response_model= List[Like])
+@router.get('/{user_id}', response_model=List[Like])
 async def get_likes(
         user_id: str,
         limit: int = 10,
         offset: int = 0,
 ) -> Any:
-    return await like_service.get_likes(user_id=user_id, limit=limit, offset=offset)
+    return await like_service.get_likes(
+            user_id=user_id,
+            limit=limit,
+            offset=offset)
 
 
 @router.post('/{user_id}/{film_id}', response_model=Like)

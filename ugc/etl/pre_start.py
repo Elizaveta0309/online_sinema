@@ -2,7 +2,6 @@ from logging import Logger
 import time
 from confluent_kafka import Consumer
 from clickhouse_driver import Client
-from utils.config import KafkaAdminSettings, ClickHouseSettings
 
 
 def check_kafka_topics(c: Consumer, logger: Logger):
@@ -18,9 +17,8 @@ def check_kafka_topics(c: Consumer, logger: Logger):
             time.sleep(5)
             continue
         break
-    
+
     logger.info('[Kafka]: Healthcheck complete.')
-    
 
 
 def check_clickhouse_inited(c: Client, logger: Logger):
