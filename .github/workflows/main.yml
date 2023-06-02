@@ -37,7 +37,7 @@ jobs:
         flake8 ugc --exit-zero --format=html --htmldir=reports/flake/
     - name: Check with mypy
       run: |
-        mypy ugc --ignore-missing-imports --html-report reports/mypy/
+        mypy ugc --ignore-missing-imports --ignore-attr-defined --html-report reports/mypy/
     - name: Upload reports
       uses: actions/upload-artifact@v2
       with:

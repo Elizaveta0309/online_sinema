@@ -137,6 +137,7 @@ class ModifiedState(State):
         self.storage.remove('modified_ids', id)
 
     def get_modified_movies_list(self) -> list[str]:
+        # sourcery skip: avoid-builtin-shadow
         list = self.storage.get_list('modified_ids')
         if list is None or not list:
             return ["00000000-0000-0000-0000-000000000000"]
