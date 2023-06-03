@@ -1,10 +1,11 @@
-from tests.testdata.movies_testdata.movies_mapping import MOVIES_MAPPING
-from tests.testdata.movies_testdata.movies_index_data import MOVIES_DATA
-from tests.testdata.genres_testdata.genres_mapping import GENRES_MAPPING
-from tests.testdata.genres_testdata.genres_index_data import GENRES_DATA
-from tests.testdata.persons_testdata.persons_mapping import PERSONS_MAPPING
-from tests.testdata.persons_testdata.persons_index_data import PERSONS_DATA
 from pydantic import BaseSettings, Field
+
+from tests.testdata.genres_testdata.genres_index_data import GENRES_DATA
+from tests.testdata.genres_testdata.genres_mapping import GENRES_MAPPING
+from tests.testdata.movies_testdata.movies_index_data import MOVIES_DATA
+from tests.testdata.movies_testdata.movies_mapping import MOVIES_MAPPING
+from tests.testdata.persons_testdata.persons_index_data import PERSONS_DATA
+from tests.testdata.persons_testdata.persons_mapping import PERSONS_MAPPING
 
 
 class TestSettings(BaseSettings):

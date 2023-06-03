@@ -40,13 +40,6 @@ services:
         CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
         CONFLUENT_METRICS_ENABLE: 'true'
         CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-      healthcheck:
-        test: nc -z localhost 9092 || exit -1
-        start_period: 15s
-        interval: 5s
-        timeout: 10s
-        retries: 10
-
 
   schema-registry:
     image: confluentinc/cp-schema-registry:6.0.1
@@ -276,7 +269,22 @@ services:
       - kibana
       - nginx
       - logstash
-      - app
+      - ugc
+
+  logstash:
+    image: logstash:8.5.3
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ES_HOST: "ugc2-elasticsearch:9200"
+    ports:
+      - "5044:5044/udp"
+      - "5045:5045/udp"
+    volumes:
+      - ./elk/deploy/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+
+
+
 
 volumes:
   mongodb_data_container:

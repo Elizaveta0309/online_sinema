@@ -1,15 +1,12 @@
 import time
 from typing import Callable
 from uuid import uuid4
-from settings import settings
-from pymongo import MongoClient
 
-from data_generation import (generate_batch,
-                             generate_bookmarks,
-                             generate_likes,
-                             generate_reviews,
+from data_generation import (generate_batch, generate_bookmarks,
+                             generate_likes, generate_reviews,
                              generate_users_batch)
-
+from pymongo import MongoClient
+from settings import settings
 
 client = MongoClient(settings.MONGO_HOST, settings.MONGO_PORT, connect=True)
 mongo_db = client[settings.MONGO_DB]
@@ -31,7 +28,8 @@ def patch_step(
         result.append(end - start)
     avr_batch = sum(result) / len(result)
     print(
-        f"Results {collection_name} batch_size={batch_size}: batch={avr_batch} sec."
+        f"Results {collection_name} "
+        f"batch_size={batch_size}: batch={avr_batch} sec."
     )
 
 
@@ -66,7 +64,8 @@ def test_reading(
 
     avr_batch = sum(result) / len(result)
     print(
-        f"Results for{collection_name} for ~{int(settings.RECORDS_SIZE/users_size)} records: {avr_batch} sec.",
+        f"Results for{collection_name} "
+        f"for ~{int(settings.RECORDS_SIZE/users_size)} records: {avr_batch} sec.",
     )
 
 

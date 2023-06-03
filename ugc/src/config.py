@@ -12,10 +12,14 @@ class Settings(BaseSettings):
     KAFKA_HOST: str = Field('broker', env='KAFKA_HOST')
     KAFKA_PORT: str = Field('29092', env='KAFKA_PORT')
     SENTRY_DSN = 'https://0051158308b3405aa651a7c8d71f34eb@o4504248096391168.ingest.sentry.io/4505279661277184'
-    LIKE = 'likedfilms'
     LIMIT: int = 10
     OFFSET: int = 0
     traces_sample_rate: float = 1.0
+    LIKES = 'likedfilms'
+    REVIEW = 'reviews'
+    BOOKMARK = 'bookmarks'
+    jwt_key: str = 'top_secret'
+
 
     class Config:
         env_file = '.env'

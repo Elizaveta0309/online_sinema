@@ -1,12 +1,11 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from db.db import Base
 # noinspection PyUnresolvedReferences
-from db.models import RefreshToken, Role, User, AccountEntrance
+from db.models import AccountEntrance, RefreshToken, Role, User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

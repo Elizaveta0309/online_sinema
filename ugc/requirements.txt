@@ -3,3 +3,5 @@ pydantic==1.9.0
 uvicorn==0.12.2
 orjson==3.8.7
 aiokafka==0.8.0
+motor==3.1.2
+sentry-sdk[fastapi]~=1.19.1

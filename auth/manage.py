@@ -1,6 +1,6 @@
 import click
 
-from db.models import User, Role
+from db.models import Role, User
 
 
 @click.group()

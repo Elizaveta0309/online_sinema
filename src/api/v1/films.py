@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from src.api.v1.constants import FILM_NOT_FOUND_MESSAGE
 from src.api.v1.models.film import Film
-from src.api.v1.query_params import SearchQueryParams, ListQueryParams
+from src.api.v1.query_params import ListQueryParams, SearchQueryParams
 from src.core.permissions import premium_needed
 from src.services.film import FilmService, get_film_service
 

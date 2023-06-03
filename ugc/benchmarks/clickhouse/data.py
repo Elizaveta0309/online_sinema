@@ -1,7 +1,7 @@
 import random
-import clickhouse_driver
 from datetime import datetime
 
+import clickhouse_driver
 
 client = clickhouse_driver.Client(host='localhost')
 

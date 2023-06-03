@@ -1,6 +1,5 @@
+from exceptions import Http404, NoCredsException
 from werkzeug.wrappers import Response
-
-from exceptions import NoCredsException, Http404
 
 
 class ExceptionHandlerMiddleware:

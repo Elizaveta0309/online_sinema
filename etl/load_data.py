@@ -1,24 +1,16 @@
 import time
+
+from dotenv import load_dotenv
 from etl_component import ETL
 from extractor import PostgresExtractor
 from loader import ElasticLoader
 from transformer import Transformer
 from utils.backoff import backoff
-from utils.config import (
-    ElasticConfig,
-    PostgresConfig,
-    RedisConfig,
-    CommonConfig
-)
-from utils.state import ModifiedState, RedisStorage
+from utils.config import (CommonConfig, ElasticConfig, PostgresConfig,
+                          RedisConfig)
+from utils.connection_manager import es_connection, pg_connection
 from utils.log import setup_logger
-from dotenv import load_dotenv
-
-from utils.connection_manager import (
-    pg_connection,
-    es_connection
-)
-
+from utils.state import ModifiedState, RedisStorage
 
 load_dotenv()
 

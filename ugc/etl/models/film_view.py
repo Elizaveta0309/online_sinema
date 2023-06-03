@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel
+
 from .base_model import ConfigMixin
 
 

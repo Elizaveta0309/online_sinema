@@ -1,8 +1,8 @@
+from exceptions import NoCredsException
 from flask import request
 from sqlalchemy.exc import ProgrammingError
 
 from db.db import db_session
-from exceptions import NoCredsException
 from db.models import User
 
 

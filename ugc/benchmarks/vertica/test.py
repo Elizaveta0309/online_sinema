@@ -2,7 +2,6 @@ import time
 from functools import wraps
 
 import vertica_python
-
 from research.vertica.data import generate_line
 
 dns = {
@@ -31,7 +30,8 @@ def measure(func):
 
 @measure
 def insert_n_rows(dns, n):
-    query = 'INSERT INTO views (user_id, movie_id, viewed_frame, event_time) VALUES (?,?,?,?)'
+    query = 'INSERT INTO views (' \
+            'user_id, movie_id, viewed_frame, event_time) VALUES (?,?,?,?)'
     print('Lines:', n)
     print(query)
     cursor = dns.cursor()

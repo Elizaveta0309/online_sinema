@@ -1,10 +1,10 @@
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from ugc.src.models.like import Like
-from ugc.src.services import like_service
+from ugc.src.models.bookmark import Bookmark
+from ugc.src.services import bookmark_service
 from ugc.src.services.auth_service import Auth
 
 router = APIRouter()
@@ -12,59 +12,69 @@ bearer_token = HTTPBearer()
 auth = Auth()
 
 
-@router.get('/{user_id}', response_model=List[Like])
-async def get_likes(
-        request: HTTPAuthorizationCredentials = Depends(bearer_token),
+@router.get('/',
+            response_model=list[Bookmark],
+            description='Получить список закладок'
+            )
+async def get_bookmarks(
         limit: int = 10,
         offset: int = 0,
+        request: HTTPAuthorizationCredentials = Depends(bearer_token),
+
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.get_likes(
+    return await bookmark_service.get_bookmarks_list(
         user_id=user_id,
         limit=limit,
-        offset=offset)
+        offset=offset
+    )
 
 
-@router.post('/{user_id}/{film_id}',
-             response_model=Like
+@router.post('/{film_id}',
+             response_model=Bookmark,
+             description='Создать закладку'
              )
-async def create_like(
+async def create_bookmark(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.create_like(
+    return await bookmark_service.create_bookmark(
         user_id=user_id,
         film_id=film_id
     )
 
 
-@router.get('/{user_id}/{film_id}', response_model=Like)
-async def get_likess(
+@router.get('/{film_id}',
+            response_model=Bookmark,
+            description='Получить закладку'
+            )
+async def read_bookmark(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.get_like(
+    return await bookmark_service.get_bookmark(
         user_id=user_id,
         film_id=film_id
     )
 
 
-@router.delete('/{user_id}/{film_id}',
-               response_model=str
+@router.delete('/{film_id}',
+               response_model=str,
+               description='Удалить закладку'
                )
-async def delete_category(
+async def delete_bookmark(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    await like_service.remove_like(
+    await bookmark_service.remove_bookmark(
         user_id=user_id,
         film_id=film_id
     )
-    return 'Likes were removed.'
+    return 'The bookmark was deleted'

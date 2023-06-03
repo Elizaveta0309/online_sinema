@@ -2,9 +2,9 @@ from functools import wraps
 from http import HTTPStatus
 
 from fastapi import HTTPException
-from jose import jwt, ExpiredSignatureError
+from jose import ExpiredSignatureError, jwt
 
-from config import settings
+from ugc.src.config import settings
 
 
 def check_permission(required_role: list):

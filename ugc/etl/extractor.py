@@ -1,9 +1,9 @@
 from logging import Logger
-from typing import Iterator, Any, List, Optional
+from typing import Any, Iterator, List, Optional
 
 from confluent_kafka import Consumer
-from utils.offset_registry import BaseOffsetRegistry
 from utils.backoff import backoff
+from utils.offset_registry import BaseOffsetRegistry
 
 
 class BaseMessageBroker:

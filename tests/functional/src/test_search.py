@@ -1,9 +1,10 @@
 import time
-import pytest
-from aiocache.serializers import PickleSerializer
-from tests.settings import test_settings
 from http import HTTPStatus
 
+import pytest
+from aiocache.serializers import PickleSerializer
+
+from tests.settings import test_settings
 
 pytestmark = pytest.mark.asyncio
 

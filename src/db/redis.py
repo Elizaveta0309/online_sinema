@@ -1,8 +1,6 @@
 from functools import lru_cache
 
-from aiocache import (
-    RedisCache,
-)
+from aiocache import RedisCache
 from aiocache.serializers import PickleSerializer
 from redis.asyncio import Redis
 

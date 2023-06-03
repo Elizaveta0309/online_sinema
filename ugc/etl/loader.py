@@ -1,5 +1,6 @@
-from typing import List
 from logging import Logger
+from typing import List
+
 from clickhouse_driver import Client
 from clickhouse_driver.errors import Error as ClickHouseError
 from pydantic import BaseModel
@@ -11,7 +12,8 @@ class BaseDatabaseLoader:
 
 
 class ClickHouseLoader(BaseDatabaseLoader):
-    QUERY = "INSERT INTO analysis.viewed_progress (user_id, film_id, viewed_frame, created_at) VALUES"
+    QUERY = "INSERT INTO analysis.viewed_progress (" \
+            "user_id, film_id, viewed_frame, created_at) VALUES"
 
     def __init__(self, client: Client, logger: Logger) -> None:
         self.client = client

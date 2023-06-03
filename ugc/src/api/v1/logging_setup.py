@@ -19,7 +19,7 @@ def setup_root_logger(log_filename: str, logger: logging.Logger) -> None:
     formatter = logging.Formatter(LOG_FORMAT)
     file_log = RotatingFileHandler(
         filename=log_filename,
-        mode="a",
+        mode='a',
         maxBytes=15000000,
         backupCount=5
     )

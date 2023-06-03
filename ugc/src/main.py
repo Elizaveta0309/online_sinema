@@ -1,12 +1,11 @@
+import sentry_sdk
+from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from aiokafka import AIOKafkaProducer
-import sentry_sdk
-from ugc.src.api.v1 import time_code
+
+from ugc.src.api.v1 import bookmarks, likes, reviews, time_code
 from ugc.src.config import settings
 from ugc.src.db import kafka_cluster
-from ugc.src.api.v1 import likes
-
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
@@ -43,4 +42,7 @@ app.include_router(
     prefix='/api/v1/time_code',
     tags=['time_code']
 )
-app.include_router(likes.router, prefix="/api/v1/likes", tags=["likes"])
+app.include_router(likes.router, prefix='/api/v1/likes', tags=['likes'])
+app.include_router(likes.router, prefix='/api/v1/likes', tags=['likes'])
+app.include_router(bookmarks.router, prefix='/api/v1/bookmarks', tags=['bookmarks'])
+app.include_router(reviews.router, prefix='/api/v1/review', tags=['review'])

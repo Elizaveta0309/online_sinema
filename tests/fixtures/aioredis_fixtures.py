@@ -1,5 +1,6 @@
 import aioredis
 import pytest
+
 from tests.settings import test_settings
 
 

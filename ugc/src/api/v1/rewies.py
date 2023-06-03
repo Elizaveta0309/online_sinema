@@ -1,10 +1,10 @@
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from ugc.src.models.like import Like
-from ugc.src.services import like_service
+from ugc.src.models.review import Review
+from ugc.src.services import review_service
 from ugc.src.services.auth_service import Auth
 
 router = APIRouter()
@@ -12,59 +12,68 @@ bearer_token = HTTPBearer()
 auth = Auth()
 
 
-@router.get('/{user_id}', response_model=List[Like])
-async def get_likes(
+@router.get('/',
+            response_model=list[Review],
+            description='Список рецензий'
+            )
+async def get_reviews(
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
         limit: int = 10,
         offset: int = 0,
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.get_likes(
+    return await review_service.get_reviews(
         user_id=user_id,
         limit=limit,
-        offset=offset)
+        offset=offset
+    )
 
 
-@router.post('/{user_id}/{film_id}',
-             response_model=Like
+@router.post('/{film_id}',
+             response_model=Review,
+             description='Создать рецензию'
              )
-async def create_like(
+async def create_review(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.create_like(
+    return await review_service.create_review(
         user_id=user_id,
         film_id=film_id
     )
 
 
-@router.get('/{user_id}/{film_id}', response_model=Like)
-async def get_likess(
+@router.get('/{film_id}',
+            response_model=Review,
+            description='Получить рецензию'
+            )
+async def read_review(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    return await like_service.get_like(
+    return await review_service.get_review(
         user_id=user_id,
         film_id=film_id
     )
 
 
-@router.delete('/{user_id}/{film_id}',
-               response_model=str
+@router.delete('/{film_id}',
+               response_model=str,
+               description='Удалить рецензию'
                )
-async def delete_category(
+async def delete_review(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
 ) -> Any:
     token = request.credentials
     user_id = auth.decode_token(token)
-    await like_service.remove_like(
+    await review_service.get_review(
         user_id=user_id,
         film_id=film_id
     )
-    return 'Likes were removed.'
+    return "The review was deleted"

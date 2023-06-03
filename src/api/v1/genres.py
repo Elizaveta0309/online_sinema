@@ -3,9 +3,10 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.v1.query_params import ListQueryParams, SearchQueryParams
-from .models.genre import Genre
 from src.services.genre import GenreService, get_genre_service
+
 from .constants import GENRE_NOT_FOUND_MESSAGE
+from .models.genre import Genre
 
 router = APIRouter()
 

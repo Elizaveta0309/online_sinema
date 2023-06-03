@@ -1,8 +1,9 @@
-from uuid import uuid4
-from confluent_kafka import Producer
-from random import randint
-from datetime import datetime
 import json
+from datetime import datetime
+from random import randint
+from uuid import uuid4
+
+from confluent_kafka import Producer
 
 p = Producer({'bootstrap.servers': 'localhost:9092'})
 

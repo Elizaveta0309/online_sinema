@@ -1,8 +1,9 @@
-from logging import Logger
 import time
+from logging import Logger
+
 from extractor import BaseMessageBroker
-from transformer import BaseTransformer
 from loader import BaseDatabaseLoader
+from transformer import BaseTransformer
 
 
 class ETL:
@@ -39,7 +40,8 @@ class ETL:
                     self.loader.load(data)
                     total_time = time.time() - start_time
                     self.logger.info(
-                        f'[ETL]: Finished loading batch. Finished in: {total_time:.2f} sec.'
+                        f'[ETL]: Finished loading batch. '
+                        f'Finished in: {total_time:.2f} sec.'
                     )
                 else:
                     self.logger.error(

@@ -1,21 +1,16 @@
 from clickhouse_driver import Client
-from utils.log import setup_logger
-from pre_start import check_clickhouse_inited
 from confluent_kafka import Consumer
-from etl.etl import ETL
-
-from utils.offset_registry import DictOffsetRegistry
-from extractor import KafkaBroker
-from models.film_view import FilmView
-from transformer import KafkaTransformer
-from loader import ClickHouseLoader
-from utils.config import (
-    ClickHouseSettings,
-    KafkaAdminSettings,
-    ETLSettings
-)
 from dotenv import load_dotenv
+from extractor import KafkaBroker
+from loader import ClickHouseLoader
+from pre_start import check_clickhouse_inited
+from transformer import KafkaTransformer
+from utils.config import ClickHouseSettings, ETLSettings, KafkaAdminSettings
+from utils.log import setup_logger
+from utils.offset_registry import DictOffsetRegistry
 
+from etl.etl import ETL
+from models.film_view import FilmView
 
 load_dotenv()
 

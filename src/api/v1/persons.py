@@ -3,9 +3,10 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.v1.query_params import ListQueryParams, SearchQueryParams
-from .models.person import Person
 from src.services.person import PersonService, get_person_service
+
 from .constants import PERSON_NOT_FOUND_MESSAGE
+from .models.person import Person
 
 router = APIRouter()
 

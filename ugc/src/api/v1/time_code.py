@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
+
+from ugc.src.api.permission import check_permission
+from ugc.src.services.time_code import TimeCodeService, get_time_code_service
+
 from .params_for_query import TimeCodeParams
-from src.services.time_code import TimeCodeService, get_time_code_service
-from src.api.permission import check_permission
 
 router = APIRouter()
 

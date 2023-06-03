@@ -8,8 +8,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 from app import app
-from db.models import User
 from settings import test_settings
+
+from db.models import User
 
 
 def test_login():

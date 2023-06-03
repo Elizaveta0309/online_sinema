@@ -1,9 +1,9 @@
 from random import choice, randint
 from typing import Callable
 from uuid import uuid4
-from settings import settings
-from faker import Faker
 
+from faker import Faker
+from settings import settings
 
 fake = Faker()
 

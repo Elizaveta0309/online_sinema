@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
 import requests
-from flask import jsonify, request
-
 from app import oauth
 from config import settings
-from db.models import UserSocial, User
+from flask import jsonify, request
 from utils.utils import generate_random_password
+
+from db.models import User, UserSocial
 
 
 def get_social_access_url(social):

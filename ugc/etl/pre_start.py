@@ -1,7 +1,8 @@
-from logging import Logger
 import time
-from confluent_kafka import Consumer
+from logging import Logger
+
 from clickhouse_driver import Client
+from confluent_kafka import Consumer
 
 
 def check_kafka_topics(c: Consumer, logger: Logger):
