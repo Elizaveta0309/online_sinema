@@ -1,7 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
-from typing import Optional
-
+from typing import Optional, List
 from fastapi import HTTPException
 
 from src.core.settings import Settings
@@ -17,7 +16,7 @@ async def get_reviews(
     user_id: str,
     limit: int = settings.LIMIT,
     offset: int = settings.OFFSET,
-) -> list[Review]:
+) -> List[Review]:
     data = await mongo.find(
         settings.REVIEW, {'user_id': user_id}, limit=limit, offset=offset
     )

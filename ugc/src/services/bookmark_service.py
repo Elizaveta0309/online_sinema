@@ -1,6 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import HTTPException
 
@@ -17,7 +17,7 @@ async def get_bookmarks_list(
     user_id: str,
     limit: int = settings.LIMIT,
     offset: int = settings.OFFSET,
-) -> list[Bookmark]:
+) -> List[Bookmark]:
     data = await mongo.find(
         settings.MONGO_COLLECTION_BOOKMARK,
         {'user_id': user_id},

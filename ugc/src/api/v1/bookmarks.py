@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
+from typing import List
 from ugc.src.models.bookmark import Bookmark
 from ugc.src.services import bookmark_service
 from ugc.src.services.auth_service import Auth
@@ -13,7 +13,7 @@ auth = Auth()
 
 
 @router.get('/',
-            response_model=list[Bookmark],
+            response_model=List[Bookmark],
             description='Получить список закладок'
             )
 async def get_bookmarks(

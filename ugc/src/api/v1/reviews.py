@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
+from typing import List
 from ugc.src.models.review import Review
 from ugc.src.services import review_service
 from ugc.src.services.auth_service import Auth
@@ -13,7 +13,7 @@ auth = Auth()
 
 
 @router.get('/',
-            response_model=list[Review],
+            response_model=List[Review],
             description='Список рецензий'
             )
 async def get_reviews(
