@@ -11,10 +11,12 @@ def check_permission(required_role: list):
     def wrapper(func):
         @wraps(func)
         async def decorator(*args, **kwargs):
-            token = kwargs['request'].credentials
+            request = kwargs['request']
+            token = request.cookies.get('token')
+            # token = kwargs['request'].credentials
             try:
                 decoded = jwt.decode(
-                    token, settings.token_secret_key, algorithms="HS256"
+                    token, settings.jwt_key, algorithms="HS256"
                 )
             except ExpiredSignatureError as exp:
                 return exp
