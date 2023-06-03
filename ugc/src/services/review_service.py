@@ -3,7 +3,7 @@ from http import HTTPStatus
 from typing import Optional, List
 from fastapi import HTTPException
 
-from src.core.settings import Settings
+from src.config import Settings
 from src.db.mongo import Mongo
 from src.models.review import Review
 

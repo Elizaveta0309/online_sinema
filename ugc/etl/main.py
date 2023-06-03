@@ -9,7 +9,7 @@ from utils.config import ClickHouseSettings, ETLSettings, KafkaAdminSettings
 from utils.log import setup_logger
 from utils.offset_registry import DictOffsetRegistry
 
-from etl.etl import ETL
+from etl_extr import ETL
 from models.film_view import FilmView
 
 load_dotenv()

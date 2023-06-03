@@ -3,9 +3,9 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from typing import List
-from ugc.src.models.bookmark import Bookmark
-from ugc.src.services import bookmark_service
-from ugc.src.services.auth_service import Auth
+from src.models.bookmark import Bookmark
+from src.services import bookmark_service
+from src.services.auth_service import Auth
 
 router = APIRouter()
 bearer_token = HTTPBearer()

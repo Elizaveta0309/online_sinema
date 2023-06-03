@@ -4,7 +4,7 @@ from http import HTTPStatus
 from fastapi import HTTPException
 from jose import ExpiredSignatureError, jwt
 
-from ugc.src.config import settings
+from src.config import settings
 
 
 def check_permission(required_role: list):

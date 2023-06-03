@@ -258,18 +258,13 @@ services:
       - mongodb_data_container:/data/db
 
   filebeat:
-    build:
-      context: filebeat
-    container_name: filebeat
+    image: elastic/filebeat:7.17.5
     volumes:
-      - .ugc/src/logs/:/src/logs
       - /tmp/logs/nginx:/var/log/nginx:ro
-    depends_on:
-      - elasticsearch
-      - kibana
-      - nginx
+      - ./elk/deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+
+    links:
       - logstash
-      - ugc
 
   logstash:
     image: logstash:8.5.3
@@ -283,7 +278,31 @@ services:
       - ./elk/deploy/logstash.conf:/config/logstash.conf:ro
     command: logstash -f /config/logstash.conf
 
+  kibana:
+    image: kibana:7.17.5
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
 
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms200m -Xmx200m
+    ports:
+      - 9200:9200
+    volumes:
+      - /tmp/logs/esdata:/tmp/elasticsearch/data
+
+  nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./elk/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./elk/configs/nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+      - /tmp/logs/nginx/:/var/log/nginx/
+    ports:
+      - 8080:80
 
 
 volumes:

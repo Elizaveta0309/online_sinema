@@ -10,3 +10,6 @@ docker-compose up -d
  ```shell
 sudo docker exec broker kafka-topics --bootstrap-server broker:9092 --create --topic views
 ```
+
+### Документация
+[Документация](http://localhost:8001/api/openapi) к проекту

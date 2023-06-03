@@ -3,7 +3,6 @@ from pydantic import BaseSettings, Field
 
 load_dotenv()
 
-
 class Settings(BaseSettings):
     PROJECT_NAME = 'TimeCodes'
     MONGO_HOST: str = Field('127.0.0.1', env='MONGO_HOST')

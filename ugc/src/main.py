@@ -3,9 +3,9 @@ from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from ugc.src.api.v1 import bookmarks, likes, reviews, time_code
-from ugc.src.config import settings
-from ugc.src.db import kafka_cluster
+from src.api.v1 import bookmarks, likes, reviews, time_code
+from src.config import settings
+from src.db import kafka_cluster
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
