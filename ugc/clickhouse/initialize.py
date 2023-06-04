@@ -1,10 +1,13 @@
 import logging
 import time
+
 from clickhouse_driver import Client
 from clickhouse_driver.errors import Error
 
-
-logging.basicConfig(format='[%(asctime)s]\t[%(levelname)s]\t%(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='[%(asctime)s]\t[%(levelname)s]\t%(message)s',
+    level=logging.INFO
+)
 
 
 # connect to db
@@ -20,7 +23,9 @@ def connection() -> Client:
 
 # initialize cluster
 def init_cluster(client: Client):
-    client.execute("CREATE DATABASE analysis ON CLUSTER 'company_cluster';")
+    client.execute(
+        "CREATE DATABASE analysis ON CLUSTER 'company_cluster';"
+    )
     client.execute(
         """
         CREATE TABLE analysis.viewed_progress_repl ON CLUSTER 'company_cluster' (

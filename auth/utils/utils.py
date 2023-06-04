@@ -2,11 +2,10 @@ from uuid import uuid4
 
 import bcrypt
 import jwt
-from jwt import ExpiredSignatureError, InvalidSignatureError
-from sqlalchemy.exc import MultipleResultsFound
-
 from config import settings
 from exceptions import Http404
+from jwt import ExpiredSignatureError, InvalidSignatureError
+from sqlalchemy.exc import MultipleResultsFound
 
 
 def encrypt_password(password):

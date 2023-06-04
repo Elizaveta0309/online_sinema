@@ -3,8 +3,7 @@ from functools import wraps
 from fastapi import HTTPException, status
 
 from src.api.v1.models.film import Film
-from src.core.utils import is_token_expired
-from src.core.utils import jwt_decode
+from src.core.utils import is_token_expired, jwt_decode
 
 
 def premium_needed(func):

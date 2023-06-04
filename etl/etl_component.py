@@ -1,14 +1,12 @@
-from datetime import datetime
 import logging
+from datetime import datetime
+
 from extractor import PostgresExtractor
-from transformer import Transformer
 from loader import ElasticLoader
+from transformer import Transformer
+from utils.exceptions import (ExtractionException, LoadException,
+                              TransformException)
 from utils.state import ModifiedState
-from utils.exceptions import (
-    ExtractionException,
-    TransformException,
-    LoadException
-)
 
 
 class ETL:
@@ -44,7 +42,9 @@ class ETL:
             # Получаем данные из БД с учетом чекпоинта
             data = self.extractor.extract_data(checkpoint)
         except Exception as e:
-            raise ExtractionException(f"Error while extracting data from Postgres: {e}")
+            raise ExtractionException(
+                f"Error while extracting data from Postgres: {e}"
+            )
         batch_count = 0
 
         # Содержимое каждого из батчей сериализуем и
@@ -58,7 +58,9 @@ class ETL:
                     data=extracted['rows']
                 )
             except Exception as e:
-                raise TransformException(f"Error while transforming batch: {e}")
+                raise TransformException(
+                    f"Error while transforming batch: {e}"
+                )
             # И выгружаем в БД
             try:
                 self.loader.load(transformed)

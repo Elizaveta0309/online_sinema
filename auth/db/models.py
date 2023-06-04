@@ -1,19 +1,25 @@
 import uuid
-from datetime import datetime, timedelta
-from datetime import timezone
-
-from sqlalchemy import Column, String, ForeignKey, DateTime, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.exc import DataError, PendingRollbackError
-from werkzeug.user_agent import UserAgent
+from datetime import datetime, timedelta, timezone
 
 from config import settings
-from db.db import db_session, Base
+from sqlalchemy import (Column,
+                        DateTime,
+                        ForeignKey,
+                        String)
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import DataError, PendingRollbackError
 from utils.utils import encrypt_password, jwt_encode
+from werkzeug.user_agent import UserAgent
+
+from db.db import Base, db_session
 
 
 class Mixin:
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    id = Column(UUID(as_uuid=True),
+                primary_key=True,
+                default=uuid.uuid4,
+                nullable=False
+                )
 
     def __init__(self, *args, **kwargs):
         ...
@@ -83,19 +89,25 @@ class User(Base, Mixin):
         token_data = {
             'user_id': str(self.id),
             'role': role,
-            'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.TOKEN_EXP)
+            'exp': datetime.now(timezone.utc) + timedelta(
+                minutes=settings.TOKEN_EXP)
         }
         refresh_data = {
             'user_id': str(self.id),
             'role': role,
-            'exp': datetime.now(timezone.utc) + timedelta(minutes=settings.REFRESH_EXP)
+            'exp': datetime.now(timezone.utc) + timedelta(
+                minutes=settings.REFRESH_EXP)
         }
         return jwt_encode(token_data), jwt_encode(refresh_data)
 
     def check_password(self, password):
         return encrypt_password(password) == self.password
 
-    def create_account_entrance(self, user_agent, ip_addr, user_auth_service):
+    def create_account_entrance(
+            self,
+            user_agent, ip_addr,
+            user_auth_service
+    ):
         agent = UserAgent(user_agent)
         platform = agent.platform
 
@@ -108,7 +120,8 @@ class User(Base, Mixin):
         else:
             platform: str = "other"
 
-        user_auth_service = user_auth_service if user_auth_service else AccountEntrance.DEFAULT_USER_AUTH_SERVICE
+        user_auth_service = user_auth_service if user_auth_service \
+            else AccountEntrance.DEFAULT_USER_AUTH_SERVICE
 
         entrance = AccountEntrance(
             user=self.id,
@@ -165,7 +178,15 @@ class AccountEntrance(Base, Mixin):
     user_auth_service = Column(String(64), nullable=False)
     platform = Column(String(64), nullable=False, primary_key=True)
 
-    def __init__(self, user, entrance_date, user_agent, ip_addr, user_auth_service, platform):
+    def __init__(
+            self,
+            user,
+            entrance_date,
+            user_agent,
+            ip_addr,
+            user_auth_service,
+            platform
+    ):
         self.user = user
         self.entrance_date = entrance_date
         self.user_agent = user_agent

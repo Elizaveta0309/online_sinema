@@ -1,7 +1,8 @@
-from clickhouse_driver import Client
-from clickhouse_driver.errors import Error
 import logging
 import time
+
+from clickhouse_driver import Client
+from clickhouse_driver.errors import Error
 
 
 def connection() -> Client:

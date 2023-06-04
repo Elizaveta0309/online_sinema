@@ -6,7 +6,6 @@ from aiocache.serializers import PickleSerializer
 from tests.settings import test_settings
 from tests.testdata.genres_testdata.genre_model import Genre
 
-
 pytestmark = pytest.mark.asyncio
 
 

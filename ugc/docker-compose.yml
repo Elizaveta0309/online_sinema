@@ -20,7 +20,7 @@ services:
       ports:
         - "9092:9092"
         - "9101:9101"
-      environment:
+      environment: 
         KAFKA_BROKER_ID: 1
         KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -40,13 +40,6 @@ services:
         CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
         CONFLUENT_METRICS_ENABLE: 'true'
         CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-      healthcheck:
-        test: nc -z localhost 9092 || exit -1
-        start_period: 15s
-        interval: 5s
-        timeout: 10s
-        retries: 10
-
 
   schema-registry:
     image: confluentinc/cp-schema-registry:6.0.1
@@ -255,3 +248,62 @@ services:
     depends_on:
       - init_db
       - broker
+
+  mongodb_container:
+    container_name: mongodb_container
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
+  filebeat:
+    image: elastic/filebeat:7.17.5
+    volumes:
+      - /tmp/logs/nginx:/var/log/nginx:ro
+      - ./elk/deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+
+    links:
+      - logstash
+
+  logstash:
+    image: logstash:8.5.3
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ES_HOST: "ugc2-elasticsearch:9200"
+    ports:
+      - "5044:5044/udp"
+      - "5045:5045/udp"
+    volumes:
+      - ./elk/deploy/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+
+  kibana:
+    image: kibana:7.17.5
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: -Xms200m -Xmx200m
+    ports:
+      - 9200:9200
+    volumes:
+      - /tmp/logs/esdata:/tmp/elasticsearch/data
+
+  nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./elk/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./elk/configs/nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+      - /tmp/logs/nginx/:/var/log/nginx/
+    ports:
+      - 8080:80
+
+
+volumes:
+  mongodb_data_container:

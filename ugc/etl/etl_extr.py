@@ -1,9 +1,9 @@
-from logging import Logger
 import time
+from logging import Logger
+
 from extractor import BaseMessageBroker
-from transformer import BaseTransformer
 from loader import BaseDatabaseLoader
-from utils.exceptions import NoMessagesException, ConsumingMessagesException
+from transformer import BaseTransformer
 
 
 class ETL:
@@ -23,12 +23,12 @@ class ETL:
         self.batch_size = batch_size
         self.refresh_time = refresh_time
         self.logger = logger
-    
+
     def start(self, batch_size: int = 1000):
         while True:
-            self.logger.info(f'[ETL]: Started processing batch.')
+            self.logger.info('[ETL]: Started processing batch.')
             start_time = time.time()
-            
+
             raw_data = self.extractor.extract(batch_size)
 
             for data in raw_data:
@@ -39,7 +39,12 @@ class ETL:
                     self.logger.info('[ETL]: Finished transforming batch.')
                     self.loader.load(data)
                     total_time = time.time() - start_time
-                    self.logger.info(f'[ETL]: Finished loading batch. Finished in: {total_time:.2f} sec.')
+                    self.logger.info(
+                        f'[ETL]: Finished loading batch. '
+                        f'Finished in: {total_time:.2f} sec.'
+                    )
                 else:
-                    self.logger.error('[ETL]: Can\'t comsume messages. Waiting...')
+                    self.logger.error(
+                        '[ETL]: Can\'t comsume messages. Waiting...'
+                    )
                     time.sleep(self.refresh_time)

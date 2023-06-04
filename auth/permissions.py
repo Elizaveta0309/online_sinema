@@ -3,9 +3,9 @@ from http import HTTPStatus
 
 from flask import jsonify, request
 from opentelemetry import trace
+from utils.utils import is_token_expired, jwt_decode
 
 from db.models import Role, User
-from utils.utils import is_token_expired, jwt_decode
 
 tracer = trace.get_tracer(__name__)
 

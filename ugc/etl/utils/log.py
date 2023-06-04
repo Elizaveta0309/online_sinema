@@ -1,7 +1,6 @@
 import logging
 import sys
 
-
 fmt = '%(asctime)s - %(levelname)s - %(message)s'
 
 

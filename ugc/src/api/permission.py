@@ -2,19 +2,21 @@ from functools import wraps
 from http import HTTPStatus
 
 from fastapi import HTTPException
-from jose import jwt, ExpiredSignatureError
+from jose import ExpiredSignatureError, jwt
 
-from config import settings
+from src.config import settings
 
 
 def check_permission(required_role: list):
     def wrapper(func):
         @wraps(func)
         async def decorator(*args, **kwargs):
-            token = kwargs['request'].credentials
+            # request = kwargs['request']
+            # token = request.cookies.get('token')
+            token = kwargs.get('request').credentials
             try:
                 decoded = jwt.decode(
-                    token, settings.token_secret_key, algorithms="HS256"
+                    token, settings.jwt_key, algorithms="HS256"
                 )
             except ExpiredSignatureError as exp:
                 return exp

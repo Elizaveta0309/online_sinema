@@ -1,18 +1,17 @@
 from authlib.integrations.flask_client import OAuth
+from config import settings
 from flasgger import Swagger
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_request_id_header.middleware import RequestID
+from middleware import ExceptionHandlerMiddleware
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
-from config import settings
-from middleware import ExceptionHandlerMiddleware
 
 resource = Resource(attributes={
     SERVICE_NAME: "Auth"

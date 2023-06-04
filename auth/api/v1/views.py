@@ -2,20 +2,21 @@ from http import HTTPStatus
 
 import flask_injector
 import injector
+from app import app
 from flasgger import swag_from
 from flask import jsonify, request
 from flask.views import MethodView
 from opentelemetry import trace
-
-from app import app
-from db.models import RefreshToken, Role, User
-from permissions import jwt_required, admin_required, is_not_logged_in
+from permissions import admin_required, is_not_logged_in, jwt_required
 from providers import BlacklistModule, LoginRequestModule
-from schemas import RoleSchema, AccountEntranceSchema
-from services import LoginRequest
+from schemas import AccountEntranceSchema, RoleSchema
 from socials import get_provider
 from utils.storage import Blacklist
-from utils.utils import is_token_expired, jwt_decode, encrypt_password, get_object_or_404
+from utils.utils import (encrypt_password, get_object_or_404, is_token_expired,
+                         jwt_decode)
+
+from db.models import RefreshToken, Role, User
+from services import LoginRequest
 
 tracer = trace.get_tracer(__name__)
 
@@ -64,7 +65,9 @@ def sign_up(login_request: LoginRequest):
             user = login_request.user
 
             if user:
-                return jsonify({'error': 'user with the login already exists'}), HTTPStatus.BAD_REQUEST
+                return jsonify(
+                    {'error': 'user with the login already exists'}),\
+                    HTTPStatus.BAD_REQUEST
 
         with tracer.start_as_current_span('create_user'):
             User.create(login_request.login, login_request.password)
@@ -87,9 +90,13 @@ def refresh():
             if not refresh_token:
                 return jsonify({'error': 'no refresh token'}), HTTPStatus.FORBIDDEN
 
-            existing_refresh_token = RefreshToken.query.filter_by(token=refresh_token).first()
+            existing_refresh_token = RefreshToken.query.filter_by(
+                token=refresh_token
+            ).first()
             if not existing_refresh_token or is_token_expired(refresh_token):
-                return jsonify({'error': "token doesn't exist or expired"}), HTTPStatus.FORBIDDEN
+                return jsonify(
+                    {'error': "token doesn't exist or expired"}),\
+                    HTTPStatus.FORBIDDEN
 
         with tracer.start_as_current_span('check_user'):
             user_id = jwt_decode(refresh_token).get('user_id')
@@ -386,7 +393,9 @@ def oauth():
     provider_id = request.args.get('provider_id')
 
     if not provider_id:
-        return jsonify({'error': 'please provide provider type'}), HTTPStatus.FORBIDDEN
+        return jsonify(
+            {'error': 'please provide provider type'}),\
+            HTTPStatus.FORBIDDEN
     provider = get_provider(provider_id)
 
     if not provider:

@@ -1,8 +1,8 @@
-from logging import Logger
 import time
-from confluent_kafka import Consumer
+from logging import Logger
+
 from clickhouse_driver import Client
-from utils.config import KafkaAdminSettings, ClickHouseSettings
+from confluent_kafka import Consumer
 
 
 def check_kafka_topics(c: Consumer, logger: Logger):
@@ -18,9 +18,8 @@ def check_kafka_topics(c: Consumer, logger: Logger):
             time.sleep(5)
             continue
         break
-    
+
     logger.info('[Kafka]: Healthcheck complete.')
-    
 
 
 def check_clickhouse_inited(c: Client, logger: Logger):
@@ -37,7 +36,7 @@ def check_clickhouse_inited(c: Client, logger: Logger):
             continue
         logger.info('[Clickhouse]: Found DB.')
 
-        c.execute(f"USE analysis")
+        c.execute("USE analysis")
 
         tables = c.execute("SHOW TABLES")
 
@@ -47,7 +46,7 @@ def check_clickhouse_inited(c: Client, logger: Logger):
             )
             continue
         logger.info('[Clickhouse]: Found table.')
-        
+
         logger.info('[ClickHouse]: Healthcheck complete.')
         c.disconnect()
         break

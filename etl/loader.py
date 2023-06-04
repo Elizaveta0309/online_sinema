@@ -1,14 +1,9 @@
 import json
 import logging
 
+from const import filmwork_schema, genres_schema, persons_schema
 from elasticsearch import Elasticsearch
 from utils.state import ModifiedState
-from const import (
-    filmwork_schema,
-    genres_schema,
-    persons_schema
-)
-
 
 INDEX_SCHEMAS = {
     'movies': filmwork_schema.MAPPING,
@@ -30,7 +25,7 @@ class ElasticLoader:
             state: ModifiedState,
             logger: logging.Logger,
             es_conn: Elasticsearch
-            ) -> None:
+    ) -> None:
         self.conn = es_conn
         self.state = state
         self.logger = logger

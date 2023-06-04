@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from src.api.v1 import films, persons, genres
+from src.api.v1 import films, genres, persons
 from src.core.config import settings
 from src.db import elastic, redis
 from src.postgres.create_db import check_bd_exists, create_db

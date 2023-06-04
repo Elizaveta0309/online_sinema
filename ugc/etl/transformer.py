@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import Any, Iterator, List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, ValidationError
 
@@ -8,6 +8,7 @@ class BaseTransformer:
     def __init__(self, target_model: BaseModel, logger: Logger) -> None:
         self.target_model = target_model
         self.logger = logger
+
     def transform(self, data: List[Any]) -> Optional[List[Any]]:
         return None
 

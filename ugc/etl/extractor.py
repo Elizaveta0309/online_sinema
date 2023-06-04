@@ -1,21 +1,26 @@
 from logging import Logger
-from typing import Iterator, Any, List, Optional
+from typing import Any, Iterator, List, Optional
 
 from confluent_kafka import Consumer
-from utils.offset_registry import BaseOffsetRegistry
-from utils.exceptions import NoMessagesException, ConsumingMessagesException
 from utils.backoff import backoff
+from utils.offset_registry import BaseOffsetRegistry
+
 
 class BaseMessageBroker:
     def extract(self, batch_size: int) -> Optional[Iterator[Any]]:
         return None
 
+
 class KafkaBroker(BaseMessageBroker):
-    def __init__(self, consumer: Consumer, offset_registry: BaseOffsetRegistry, logger: Logger) -> None:
+    def __init__(
+        self, consumer: Consumer,
+        offset_registry: BaseOffsetRegistry,
+        logger: Logger
+    ) -> None:
         self.consumer = consumer
         self.offset_registry = offset_registry
         self.logger = logger
-    
+
     @backoff()
     def extract(self, batch_size: int = 10000) -> Optional[Iterator[Any]]:
         batch: List = []
@@ -26,7 +31,9 @@ class KafkaBroker(BaseMessageBroker):
                 self.logger.info(f'[Kafka]: Consumed a batch of {len(batch)}')
                 yield batch
             elif msg.error():
-                self.logger.error(f'[Kafka]: Error while consuming messages: {msg.error()}')
+                self.logger.error(
+                    f'[Kafka]: Error while consuming messages: {msg.error()}'
+                )
                 self.logger.info(f'[Kafka]: Consumed a batch of {len(batch)}')
                 yield batch
             else:

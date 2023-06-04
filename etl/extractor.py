@@ -2,17 +2,11 @@ import logging
 from datetime import datetime
 from typing import Generator
 
-
-from const.postgres_queries import (
-    FILMWORK_QUERY,
-    GENRES_QUERY,
-    PERSONS_QUERY
-)
-
-from models import PersonModel, GenreModel, FilmworkModel
+from const.postgres_queries import FILMWORK_QUERY, GENRES_QUERY, PERSONS_QUERY
 from psycopg2.extras import RealDictCursor
 from utils.state import ModifiedState
 
+from models import FilmworkModel, GenreModel, PersonModel
 
 MODELS = [
     {
@@ -41,7 +35,7 @@ class PostgresExtractor:
             batch_size: int,
             logger: logging.Logger,
             pg_conn
-            ) -> None:
+    ) -> None:
         self.conn = pg_conn
         self.state = state
         self.batch_size = batch_size

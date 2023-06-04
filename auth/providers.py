@@ -2,8 +2,9 @@ import flask
 import flask_injector
 import injector
 from config import settings
-from services import LoginRequest
 from utils.storage import Blacklist, RedisStorage
+
+from services import LoginRequest
 
 
 class BlacklistModule(injector.Module):
