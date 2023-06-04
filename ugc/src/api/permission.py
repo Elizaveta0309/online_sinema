@@ -11,9 +11,9 @@ def check_permission(required_role: list):
     def wrapper(func):
         @wraps(func)
         async def decorator(*args, **kwargs):
-            request = kwargs['request']
-            token = request.cookies.get('token')
-            # token = kwargs['request'].credentials
+            # request = kwargs['request']
+            # token = request.cookies.get('token')
+            token = kwargs.get('request').credentials
             try:
                 decoded = jwt.decode(
                     token, settings.jwt_key, algorithms="HS256"
