@@ -1,4 +1,3 @@
-"""Mongo DB adapter."""
 from motor.motor_asyncio import (AsyncIOMotorClient, AsyncIOMotorCollection,
                                  AsyncIOMotorCursor)
 
