@@ -2,6 +2,7 @@ import sentry_sdk
 from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from contextlib import asynccontextmanager
 
 from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
@@ -22,6 +23,7 @@ if settings.SENTRY_DSN:
         traces_sample_rate=settings.traces_sample_rate,
     )
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     docs_url='/api/openapi',
@@ -34,17 +36,25 @@ app = FastAPI(
 @app.on_event('startup')
 async def startup():
     mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     kafka_cluster.producer = AIOKafkaProducer(
         bootstrap_servers=['broker:29092']
     )
     await kafka_cluster.producer.start()
-
-
-@app.on_event('shutdown')
-async def shutdown():
+    yield
     await kafka_cluster.producer.stop()
     await mongo.mongo_client.close()
 
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    docs_url='/api/openapi',
+    openapi_url='/api/openapi.json',
+    default_response_class=ORJSONResponse,
+    debug=True,
+    lifespan=lifespan
+)
 
 # Подключаем роутер к серверу, указав префикс /v1/time_code
 # Теги указываем для удобства навигации по документации
