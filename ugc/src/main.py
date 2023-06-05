@@ -6,6 +6,15 @@ from fastapi.responses import ORJSONResponse
 from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
 from src.db import kafka_cluster
+from motor.motor_asyncio import AsyncIOMotorClient
+from db.mongo import Mongo
+
+
+mongo_client: AsyncIOMotorClient | None = None
+mongo = Mongo()
+
+async def get_mongo_client() -> AsyncIOMotorClient:
+    return mongo_client
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
@@ -24,6 +33,7 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
+    mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
     kafka_cluster.producer = AIOKafkaProducer(
         bootstrap_servers=['broker:29092']
     )
@@ -33,6 +43,7 @@ async def startup():
 @app.on_event('shutdown')
 async def shutdown():
     await kafka_cluster.producer.stop()
+    await mongo.mongo_client.close()
 
 
 # Подключаем роутер к серверу, указав префикс /v1/time_code
