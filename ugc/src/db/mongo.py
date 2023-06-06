@@ -31,7 +31,7 @@ class Mongo:
             data: dict,
     ) -> None:
         collection = self._get_collection(collection_name)
-        await collection.insert_one(data)
+        await collection.replace_one(data, upsert=True)
 
     async def find_one(
             self,
