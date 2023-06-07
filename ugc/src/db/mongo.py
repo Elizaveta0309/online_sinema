@@ -39,7 +39,7 @@ class Mongo:
             condition: dict,
     ) -> dict:
         collection = self._get_collection(collection_name)
-        return await collection.find_one(condition)
+        return await collection.update_one(condition)
 
     async def delete(
             self,

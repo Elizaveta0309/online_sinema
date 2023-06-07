@@ -8,7 +8,8 @@ from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
 from src.db import kafka_cluster
 from motor.motor_asyncio import AsyncIOMotorClient
-from db.mongo import Mongo
+from src.db.mongo import Mongo
+
 
 
 mongo_client: AsyncIOMotorClient | None = None
@@ -17,25 +18,6 @@ mongo = Mongo()
 async def get_mongo_client() -> AsyncIOMotorClient:
     return mongo_client
 
-if settings.SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=settings.SENTRY_DSN,
-        traces_sample_rate=settings.traces_sample_rate,
-    )
-
-
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    docs_url='/api/openapi',
-    openapi_url='/api/openapi.json',
-    default_response_class=ORJSONResponse,
-    debug=True
-)
-
-
-@app.on_event('startup')
-async def startup():
-    mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -55,6 +37,19 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan
 )
+
+
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        traces_sample_rate=settings.traces_sample_rate,
+    )
+
+
+@app.on_event('startup')
+async def startup():
+    mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+
 
 # Подключаем роутер к серверу, указав префикс /v1/time_code
 # Теги указываем для удобства навигации по документации
