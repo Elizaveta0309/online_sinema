@@ -13,13 +13,13 @@ from motor.motor_asyncio import AsyncIOMotorClient
 mongo = Mongo()
 
 
-# app = FastAPI(
-#     title=settings.PROJECT_NAME,
-#     docs_url='/api/openapi',
-#     openapi_url='/api/openapi.json',
-#     default_response_class=ORJSONResponse,
-#     debug=True,
-# )
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    docs_url='/api/openapi',
+    openapi_url='/api/openapi.json',
+    default_response_class=ORJSONResponse,
+    debug=True,
+)
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
@@ -27,37 +27,37 @@ if settings.SENTRY_DSN:
         traces_sample_rate=settings.traces_sample_rate,
     )
 
-# @app.on_event('startup')
-# async def startup():
-#     kafka_cluster.producer = AIOKafkaProducer(bootstrap_servers=['broker:29092'])
-#     await kafka_cluster.producer.start()
-#     mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
-
-
-# @app.on_event('shutdown')
-# async def shutdown():
-#     await kafka_cluster.producer.stop()
-#     mongo.get_mongo_client().close()
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    kafka_cluster.producer = AIOKafkaProducer(
-        bootstrap_servers=['broker:29092']
-    )
+@app.on_event('startup')
+async def startup():
+    kafka_cluster.producer = AIOKafkaProducer(bootstrap_servers=['broker:29092'])
     await kafka_cluster.producer.start()
     mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
-    yield
+
+
+@app.on_event('shutdown')
+async def shutdown():
     await kafka_cluster.producer.stop()
     mongo.get_mongo_client().close()
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    docs_url='/api/openapi',
-    openapi_url='/api/openapi.json',
-    default_response_class=ORJSONResponse,
-    debug=True,
-    lifespan=lifespan
-)
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     kafka_cluster.producer = AIOKafkaProducer(
+#         bootstrap_servers=['broker:29092']
+#     )
+#     await kafka_cluster.producer.start()
+#     mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+#     yield
+#     await kafka_cluster.producer.stop()
+#     mongo.get_mongo_client().close()
+
+# app = FastAPI(
+#     title=settings.PROJECT_NAME,
+#     docs_url='/api/openapi',
+#     openapi_url='/api/openapi.json',
+#     default_response_class=ORJSONResponse,
+#     debug=True,
+#     lifespan=lifespan
+# )
 
 
 app.include_router(
