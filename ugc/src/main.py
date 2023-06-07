@@ -45,8 +45,6 @@ async def startup():
     mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
 
 
-# Подключаем роутер к серверу, указав префикс /v1/time_code
-# Теги указываем для удобства навигации по документации
 app.include_router(
     time_code.router,
     prefix='/api/v1/time_code',
