@@ -8,20 +8,10 @@ from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
 from src.db import kafka_cluster
 from src.db.mongo import Mongo
+from motor.motor_asyncio import AsyncIOMotorClient
 
 mongo = Mongo()
 
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    kafka_cluster.producer = AIOKafkaProducer(
-        bootstrap_servers=['broker:29092']
-    )
-    await kafka_cluster.producer.start()
-    yield
-    await kafka_cluster.producer.stop()
-    await mongo.get_mongo_client().close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,9 +19,7 @@ app = FastAPI(
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
     debug=True,
-    lifespan=lifespan
 )
-
 
 if settings.SENTRY_DSN:
     sentry_sdk.init(
@@ -41,7 +29,15 @@ if settings.SENTRY_DSN:
 
 @app.on_event('startup')
 async def startup():
-    mongo.get_mongo_client()(settings.MONGODB_URL)
+    kafka_cluster.producer = AIOKafkaProducer(bootstrap_servers=['broker:29092'])
+    await kafka_cluster.producer.start()
+    mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+
+
+@app.on_event('shutdown')
+async def shutdown():
+    await kafka_cluster.producer.stop()
+    mongo.get_mongo_client().close()
 
 
 app.include_router(
