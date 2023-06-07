@@ -3,6 +3,8 @@ from motor.motor_asyncio import (AsyncIOMotorClient, AsyncIOMotorCollection,
 
 from src.config import settings
 
+mongo_client: AsyncIOMotorClient | None = None
+
 
 class Mongo:
     def __init__(self) -> None:
@@ -48,3 +50,7 @@ class Mongo:
     ) -> None:
         collection = self._get_collection(collection_name)
         await collection.delete_many(condition)
+
+    @staticmethod
+    async def get_mongo_client() -> AsyncIOMotorClient:
+        return mongo_client

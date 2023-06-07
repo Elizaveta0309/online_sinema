@@ -7,16 +7,11 @@ from contextlib import asynccontextmanager
 from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
 from src.db import kafka_cluster
-from motor.motor_asyncio import AsyncIOMotorClient
 from src.db.mongo import Mongo
+from motor.motor_asyncio import AsyncIOMotorClient
 
 
-
-mongo_client: AsyncIOMotorClient | None = None
 mongo = Mongo()
-
-async def get_mongo_client() -> AsyncIOMotorClient:
-    return mongo_client
 
 
 @asynccontextmanager
@@ -44,7 +39,6 @@ if settings.SENTRY_DSN:
         dsn=settings.SENTRY_DSN,
         traces_sample_rate=settings.traces_sample_rate,
     )
-
 
 @app.on_event('startup')
 async def startup():
