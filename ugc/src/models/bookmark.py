@@ -10,6 +10,11 @@ def orjson_dumps(v, *, default):
 
 
 class BaseUGCModel(BaseModel):
+    """_summary_
+
+    Args:
+        BaseModel (_type_): _description_
+    """
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
