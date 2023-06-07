@@ -12,6 +12,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 
 mongo = Mongo()
+mongo_client = mongo.get_mongo_client()
 
 
 @asynccontextmanager
