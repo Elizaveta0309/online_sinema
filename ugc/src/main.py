@@ -46,10 +46,10 @@ async def lifespan(app: FastAPI):
         bootstrap_servers=['broker:29092']
     )
     await kafka_cluster.producer.start()
-    mongo.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+    mongo.client = AsyncIOMotorClient(settings.MONGODB_URL)
     yield
     await kafka_cluster.producer.stop()
-    mongo.get_mongo_client().close()
+    mongo.client.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
