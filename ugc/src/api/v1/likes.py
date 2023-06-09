@@ -26,7 +26,7 @@ async def get_likes(
         offset=offset)
 
 
-@router.post('/{user_id}/{film_id}',
+@router.post('/{film_id}',
              response_model=Like
              )
 async def create_like(
@@ -41,7 +41,7 @@ async def create_like(
     )
 
 
-@router.get('/{user_id}/{film_id}', response_model=Like)
+@router.get('/{film_id}', response_model=Like)
 async def get_likess(
         film_id: str,
         request: HTTPAuthorizationCredentials = Depends(bearer_token),
@@ -54,7 +54,7 @@ async def get_likess(
     )
 
 
-@router.delete('/{user_id}/{film_id}',
+@router.delete('/{film_id}',
                response_model=str
                )
 async def delete_category(
