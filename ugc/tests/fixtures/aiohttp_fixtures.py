@@ -1,5 +1,6 @@
 import pytest
 from aiohttp import ClientSession, CookieJar
+from typing import Dict, Any
 
 from tests.settings import test_settings
 
@@ -14,7 +15,7 @@ async def client_session():
 
 @pytest.fixture()
 def make_get_request(client_session):
-    async def inner(endpoint: str, query_data: dict = None, cookies: dict= None):
+    async def inner(endpoint: str, query_data: Dict[Any, Any], cookies: Dict[Any, Any]):
         url = test_settings.service_url + endpoint
         response = await client_session.get(url, params=query_data, cookies=cookies)
         return response
@@ -23,7 +24,7 @@ def make_get_request(client_session):
 
 @pytest.fixture()
 def make_post_request(client_session):
-    async def inner(endpoint: str, query_data: dict = None, cookies: dict = None):
+    async def inner(endpoint: str, query_data: Dict[Any, Any], cookies: Dict[Any, Any]):
         url = test_settings.service_url + endpoint
         response = await client_session.post(url, params=query_data, cookies=cookies)
         return response
