@@ -19,7 +19,7 @@ async def get_bookmarks_list(
     offset: int = settings.OFFSET,
 ) -> List[Bookmark]:
     data = await mongo.find(
-        settings.MONGO_COLLECTION_BOOKMARK,
+        settings.BOOKMARK,
         {'user_id': user_id},
         limit=limit,
         offset=offset

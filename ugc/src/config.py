@@ -14,10 +14,11 @@ class Settings(BaseSettings):
     LIMIT: int = 10
     OFFSET: int = 0
     traces_sample_rate: float = 1.0
-    LIKES = 'likedfilms'
+    LIKE = 'likedfilms'
     REVIEW = 'reviews'
     BOOKMARK = 'bookmarks'
     jwt_key: str = 'top_secret'
+    MONGODB_URL: str = 'mongodb://mongodb_container:27017'
 
 
     class Config:

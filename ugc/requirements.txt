@@ -1,5 +1,4 @@
 fastapi
-contextlib
 pydantic==1.9.0
 uvicorn==0.12.2
 orjson==3.8.7

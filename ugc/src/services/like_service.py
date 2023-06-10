@@ -46,7 +46,6 @@ async def create_like(user_id: str, film_id: str) -> Like:
     await mongo.insert(settings.LIKE, data.dict())
     return data
 
-
 async def remove_like(user_id: str, film_id: str) -> None:
     data = await mongo.find_one(
         settings.LIKE,

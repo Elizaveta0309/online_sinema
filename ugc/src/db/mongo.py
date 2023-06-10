@@ -1,9 +1,9 @@
-"""Mongo DB adapter."""
 from motor.motor_asyncio import (AsyncIOMotorClient, AsyncIOMotorCollection,
                                  AsyncIOMotorCursor)
 
 from src.config import settings
 
+# mongo_client: AsyncIOMotorClient | None = None
 
 class Mongo:
     def __init__(self) -> None:
@@ -32,7 +32,7 @@ class Mongo:
             data: dict,
     ) -> None:
         collection = self._get_collection(collection_name)
-        await collection.insert_one(data)
+        await collection.replace_one(data, upsert=True)
 
     async def find_one(
             self,
@@ -40,7 +40,7 @@ class Mongo:
             condition: dict,
     ) -> dict:
         collection = self._get_collection(collection_name)
-        return await collection.find_one(condition)
+        return await collection.update_one(condition)
 
     async def delete(
             self,
@@ -49,3 +49,7 @@ class Mongo:
     ) -> None:
         collection = self._get_collection(collection_name)
         await collection.delete_many(condition)
+
+    # @staticmethod
+    # async def get_mongo_client(self) -> AsyncIOMotorClient:
+    #     return self.client

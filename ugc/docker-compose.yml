@@ -244,7 +244,7 @@ services:
       dockerfile: Dockerfile
     container_name: etl_process
     env_file:
-      - ./etl/.env
+      - .env
     depends_on:
       - init_db
       - broker
