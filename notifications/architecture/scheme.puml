@@ -1,0 +1,35 @@
+@startuml
+!theme toy
+skinparam componentStyle uml2
+
+title "Notification Service"
+
+component "Outer Services" as ext_serv
+
+node {
+queue "Rabbit MQ" as rabbit
+database "PostgreSQL" as postgres
+
+component "Django Admin" as django_admin
+component "Scheduler" as scheduler
+component "Worker_sender" as worker
+
+component "Worker_collector" as worker2
+
+component "API(FastAPI)" as api
+
+component "Nginx" as nginx
+nginx <--> api
+nginx <--> django_admin
+api --> rabbit
+scheduler <-> postgres
+scheduler <-> api
+django_admin -> postgres
+rabbit --> worker
+worker <-> postgres
+worker2 <--> rabbit
+worker <--> ext_serv
+api --> postgres
+
+}
+@enduml
