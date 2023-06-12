@@ -1,0 +1,10 @@
+Django
+python-dotenv
+django-summernote
+django-tinymce
+django-stubs
+psycopg2
+uwsgi
+gunicorn
+
+
