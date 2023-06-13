@@ -1,7 +1,7 @@
 import uuid
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 import backoff
 import psycopg2
@@ -43,7 +43,7 @@ class PostgresStorage(MainStorage):
     def update_event(
         self,
         note_id: Optional[uuid.UUID] = None,
-        next_date: Optional[datetime] = None,
+        next_date: Optional[Any] = None,
     ):
         next_date = str(next_date) if next_date else None
         query = (
