@@ -30,7 +30,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install lxml types-requests
         pip install wemake-python-styleguide flake8-html mypy
-        mypy --install-types
+        
       
 
 
