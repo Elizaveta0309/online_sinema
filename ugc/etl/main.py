@@ -1,6 +1,7 @@
 from clickhouse_driver import Client
 from confluent_kafka import Consumer
 from dotenv import load_dotenv
+from etl_extr import ETL
 from extractor import KafkaBroker
 from loader import ClickHouseLoader
 from pre_start import check_clickhouse_inited
@@ -9,7 +10,6 @@ from utils.config import ClickHouseSettings, ETLSettings, KafkaAdminSettings
 from utils.log import setup_logger
 from utils.offset_registry import DictOffsetRegistry
 
-from etl_extr import ETL
 from models.film_view import FilmView
 
 load_dotenv()

@@ -10,7 +10,7 @@ async def welcome(websocket: websockets.WebSocketServerProtocol) -> str:
     await websocket.send('Представьтесь!')
     name = await websocket.recv()
     await websocket.send(
-        'Чтобы поговорить, напишите "<имя>: <сообщение>". Например: Ира: купи хлеб.'
+        'Напишите "<имя>: <сообщение>". Например: Ира: купи хлеб.'
     )
     await websocket.send('Посмотреть список участников можно командой "?"')
     peoples[name.strip()] = websocket
@@ -19,7 +19,8 @@ async def welcome(websocket: websockets.WebSocketServerProtocol) -> str:
 
 async def receiver(
     websocket: websockets.WebSocketServerProtocol,
-    path: str)-> None:
+    path: str
+) -> None:
     name = await welcome(websocket)
     try:
         while True:
@@ -36,7 +37,7 @@ async def receiver(
                         await websocket.send(f'Пользователь {to} не найден')
                 except ValueError:
                     await websocket.send(
-                        'Неправильный формат сообщения! Попробуйте "<имя>: <сообщение>"'
+                        'Неправильный формат! Попробуйте "<имя>: <сообщение>"'
                     )
     except ConnectionClosedError:
         del peoples[name.strip()]

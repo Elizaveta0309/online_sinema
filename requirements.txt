@@ -28,3 +28,10 @@ uvloop==0.17.0
 yarl==1.8.2
 PyJWT==2.6.0
 requests==2.28.2
+
+pip~=22.3.1
+wheel~=0.38.4
+setuptools~=65.5.1
+Django~=4.2.2
+asgiref~=3.7.2
+sqlparse~=0.4.4

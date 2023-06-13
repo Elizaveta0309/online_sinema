@@ -1,6 +1,7 @@
+from typing import Any, Dict
+
 import pytest
 from aiohttp import ClientSession, CookieJar
-from typing import Dict, Any
 
 from tests.settings import test_settings
 

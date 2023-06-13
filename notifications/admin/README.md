@@ -9,9 +9,9 @@
 | SECRET_KEY | используется для криптографической подписи (для генерации хэшей и токенов), длина ключа - 50 символов Генератор ключей Django: https://djecrety.ir |  |
 | DB_HOST| ip-адрес или имя хоста PostgreSQL |  |
 | DB_PORT | порт, который слушает PostgreSQL |  |
-| DJANGO_SUPERUSER_USERNAME |  |  |
-| DJANGO_SUPERUSER_PASSWORD |  |  |
-| DJANGO_SUPERUSER_EMAIL |  |  |
+| SUPERUSER_USERNAME |  |  |
+| SUPERUSER_PASSWORD |  |  |
+| SUPERUSER_EMAIL |  |  |
 
 ### Запуск:
 

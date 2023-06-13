@@ -2,10 +2,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from config import settings
-from sqlalchemy import (Column,
-                        DateTime,
-                        ForeignKey,
-                        String)
+from sqlalchemy import Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import DataError, PendingRollbackError
 from utils.utils import encrypt_password, jwt_encode
