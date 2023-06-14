@@ -9,6 +9,10 @@ class LikeParams:
             transport: str = Query(
                 default='email'
             ),
+            event_type: str = Query(
+                default='notification_about_like',
+                description='Describes type of event',
+            ),
             user_id: str = Query(
                 default='user_id_for_example',
                 description='User ID',
@@ -23,6 +27,7 @@ class LikeParams:
             )
     ):
         self.transport = transport
+        self.event_type = event_type
         self.user_id = user_id
         self.review_id = review_id
         self.liker_id = liker_id
@@ -33,6 +38,10 @@ class NewFilmsParams:
             transport: str = Query(
                 default='email'
             ),
+            event_type: str = Query(
+                default='notification_about_new_films',
+                description='Describes type of event',
+            ),
             users_id: List[str] = Query(
                 description='Users IDs',
             ),
@@ -41,6 +50,7 @@ class NewFilmsParams:
             ),
     ):
         self.transport = transport
+        self.event_type = event_type
         self.users_id = users_id
         self.films_id = films_id
 
@@ -51,16 +61,21 @@ class SomeEventParams:
             transport: str = Query(
                 default='email'
             ),
+            event_type: str = Query(
+              default='notification_from_admin_panel',
+              description='Describes type of event',
+            ),
             user_id: str = Query(
                 default='user_id_for_example',
                 description='User ID',
             ),
-            event_type: str = Query(
-                default='personalized subscription offer',
-                decsription='Describes type of personalized letter for user'
+            text: str = Query(
+                default='some personalized subscription offer',
+                decsription='Text of personalized letter for user'
             ),
 
     ):
         self.transport = transport
-        self.user_id = user_id
         self.event_type = event_type
+        self.user_id = user_id
+        self.text = text
