@@ -1,6 +1,6 @@
 version: '3'
 services:
-  
+
   admin:
 
     build: ./admin
@@ -11,9 +11,17 @@ services:
     depends_on:
       - postgresql
     volumes:
-      - staticfiles:/admin_panel/staticfiles
+      - staticfiles:/admin/staticfiles
 
-  
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    ports:
+      - 5672:5672
+      - 15672:15672
+
   postgresql:
     image: postgres:13-alpine
     environment:

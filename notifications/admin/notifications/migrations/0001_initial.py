@@ -5,13 +5,14 @@ import uuid
 import django.db.models.deletion
 import tinymce.models
 from django.db import migrations, models
+from typing import List, Any
 
 
 class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
+    dependencies: List[Any] = [
     ]
 
     operations = [

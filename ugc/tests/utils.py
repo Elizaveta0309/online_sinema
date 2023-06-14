@@ -1,6 +1,9 @@
+from datetime import datetime, timedelta, timezone
+
 import jwt
+
 from tests.settings import test_settings
-from datetime import datetime, timezone, timedelta
+
 
 def encode_user(user: dict) -> str:
     print(user)

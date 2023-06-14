@@ -5,7 +5,6 @@ import pytest
 from tests.settings import test_settings
 from tests.utils import encode_user
 
-
 pytestmark = pytest.mark.asyncio
 
 @pytest.mark.parametrize(

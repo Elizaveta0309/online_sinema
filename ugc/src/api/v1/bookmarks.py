@@ -1,8 +1,8 @@
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from typing import List
+
 from src.models.bookmark import Bookmark
 from src.services import bookmark_service
 from src.services.auth_service import Auth

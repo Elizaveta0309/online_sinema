@@ -1,4 +1,5 @@
-from pydantic import Field, BaseSettings
+from pydantic import BaseSettings, Field
+
 
 class TestSettings(BaseSettings):
     service_url: str = Field('http://localhost:8001')

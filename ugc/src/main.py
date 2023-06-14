@@ -1,15 +1,15 @@
+from contextlib import asynccontextmanager
+
 import sentry_sdk
 from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.api.v1 import bookmarks, likes, reviews, time_code
 from src.config import settings
 from src.db import kafka_cluster
 from src.db.mongo import Mongo
-from motor.motor_asyncio import AsyncIOMotorClient
-from contextlib import asynccontextmanager
 
 mongo = Mongo()
 

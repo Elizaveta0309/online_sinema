@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import models
-from tinymce.models import HTMLField
+from tinymce import models as tinymce_models
 
 
 class UUIDMixin(models.Model):
@@ -15,34 +15,33 @@ class UUIDMixin(models.Model):
 
 class Channel(models.TextChoices):
 
-    email = 'email'
-    websocket = 'websocket'
+    email: str = 'email'
 
 
 class UserGroup(models.TextChoices):
 
-    all = 'all'
+    all: str = 'all'
 
 
 class Frequency(models.TextChoices):
 
-    once = 'once'
-    daily = 'daily'
-    weekly = 'weekly'
-    monthly = 'monthly'
+    once: str = 'once'
+    daily: str = 'daily'
+    weekly: str = 'weekly'
+    monthly: str = 'monthly'
 
 
 class Priority(models.TextChoices):
 
-    low = 'low'
-    high = 'high'
+    low: str = 'low'
+    high: str = 'high'
 
 
 class Event(models.TextChoices):
 
-    review_rated = 'review-reporting.v1.rated'
-    user_registered = 'user-reporting.v1.registered'
-    admin = 'admin-reporting.v1.event'
+    review_rated: str = 'review-reporting.v1.rated'
+    user_registered: str = 'user-reporting.v1.registered'
+    admin: str = 'admin-reporting.v1.event'
 
 
 class Template(UUIDMixin):
@@ -54,7 +53,7 @@ class Template(UUIDMixin):
         max_length=50,
     )
     subject = models.TextField(blank=True)
-    template = HTMLField()
+    template = tinymce_models.HTMLField()
     event = models.CharField(
         choices=Event.choices,
         max_length=50,
