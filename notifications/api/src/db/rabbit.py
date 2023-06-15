@@ -20,3 +20,4 @@ class AsyncRabbitPublisher:
 
 async def get_rabbit() -> AsyncRabbitPublisher:
     return AsyncRabbitPublisher()
+
