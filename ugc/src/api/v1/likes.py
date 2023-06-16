@@ -40,6 +40,19 @@ async def create_like(
         film_id=film_id
     )
 
+@router.post('/{review_id}',
+             response_model=Like
+             )
+async def create_review_like(
+        film_id: str,
+        request: HTTPAuthorizationCredentials = Depends(bearer_token),
+) -> Any:
+    token = request.credentials
+    user_id = auth.decode_token(token)
+    return await like_service.create_like(
+        user_id=user_id,
+        review_id=review_id
+    )
 
 @router.get('/{film_id}', response_model=Like)
 async def get_likess(

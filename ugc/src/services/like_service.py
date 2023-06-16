@@ -46,6 +46,17 @@ async def create_like(user_id: str, film_id: str) -> Like:
     await mongo.insert(settings.LIKE, data.dict())
     return data
 
+async def create_review_like(user_id: str, review_id: str) -> Like:
+    data = await mongo.find_one(
+        settings.LIKE,
+        {'user_id': user_id, 'review_id': review_id}
+    )
+    if data:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST)
+    data = Like(user_id=user_id, review_id=review_id, date_time=datetime.now())
+    await mongo.insert(settings.LIKE, data.dict())
+    return data
+
 async def remove_like(user_id: str, film_id: str) -> None:
     data = await mongo.find_one(
         settings.LIKE,
