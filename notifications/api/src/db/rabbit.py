@@ -3,9 +3,14 @@ import pika
 import datetime
 
 
+
 class AsyncRabbitPublisher:
     def __init__(self):
-        self.parameters = pika.URLParameters("here coonection to rabbit has to be")
+        self.credentials = pika.PlainCredentials('guest', 'guest')
+        self.parameters = pika.URLParameters('rabbitmq',
+                                       5672,
+                                       '/',
+                                       self.credentials)
         self.connection = pika.BlockingConnection(self.parameters)
         self.channel = None
 
