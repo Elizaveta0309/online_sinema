@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import sendgrid
 from core.config import settings
 from sendgrid.helpers.mail import Content, Email, Mail, To
@@ -5,8 +6,9 @@ import email
 from datetime import datetime
 
 
-class BaseMailer:
+class BaseMailer(ABC):
     """ Базовый сервис отправки писем. """
+    @abstractmethod
     def send_message(self, email: str, content: str, subject: str) -> None:
         pass
 
@@ -48,12 +50,12 @@ class FakeMailer(BaseMailer):
 
         if msg.is_multipart():
             for part in msg.walk():
-                content_type = part.get_content_type()
-                if content_type == "text/plain" or content_type == "text/html":
-                    body = part.get_payload(decode=True).decode()
-                    print(body)
+                self._print_message(part)
         else:
-            content_type = msg.get_content_type()
-            if content_type == "text/plain" or content_type == "text/html":
-                body = msg.get_payload(decode=True).decode()
-                print(body)
+            self._print_message(part)
+
+    def _print_message(self, msg) -> None:
+        content_type = msg.get_content_type()
+        if content_type == "text/plain" or content_type == "text/html":
+            body = msg.get_payload(decode=True).decode()
+            print(body)

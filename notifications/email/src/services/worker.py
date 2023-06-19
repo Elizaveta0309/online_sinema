@@ -53,7 +53,7 @@ class Worker:
         try:
             context = self._get_context(event_type, body_json)
         except EventNotImplementedError:
-            logging.error('Unexpected event type occured.')
+            logging.error('Неизвестный тип события.')
             return
 
         email_content = self.templater.render_template(template, context)
