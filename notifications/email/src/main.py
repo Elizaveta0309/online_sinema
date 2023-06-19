@@ -33,21 +33,19 @@ configure_logging()
 def main() -> None:
     add_queue()
     rabbit = get_rabbit()
-    logging.info('RabbitMQ connection established.')
+    logging.info('Соединение с RabbitMQ установлено.')
 
     postgres_connection = Postgres()
-    logging.info('Postgres connection established.')
+    logging.info('Соедниение с хранилищем шаблонов установлено.')
 
     templater = PostgresTemplater(
         postgres_connection
     )
-    logging.info('Templater configured.')
 
     mailer = SendGridMailer(
         email=settings.EMAIL_FROM,
         api_key=settings.SENDGRID
     )
-    logging.info('Mailer configured.')
 
     enrichers = {
         entity: ModelEnricher(**conf)
