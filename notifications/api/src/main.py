@@ -9,11 +9,13 @@ from notifications.api.src.api.v1 import notifications
 
 rabbit = get_rabbit()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     rabbit.channel = rabbit.connection.channel()
     yield
     rabbit.connection.close()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,7 +25,6 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan
 )
-
 
 app.include_router(
     notifications.router,
