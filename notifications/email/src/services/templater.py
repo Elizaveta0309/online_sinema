@@ -2,6 +2,7 @@ from models.template import Template as EmailTemplate
 from db.psql.postgres import Postgres
 from psycopg2.sql import SQL
 from jinja2 import Environment
+from abc import ABC, abstractmethod
 
 TEMPLATE_QUERY = """
     SELECT *
@@ -10,11 +11,12 @@ TEMPLATE_QUERY = """
     """
 
 
-class BaseTemplater:
+class BaseTemplater(ABC):
     """ Базовый сервис работы с шаблонами писем. """
+    @abstractmethod
     def get_template(self, name: str) -> EmailTemplate:
         pass
-
+    @abstractmethod
     def render_template(self, template: EmailTemplate, context: dict) -> str:
         pass
 

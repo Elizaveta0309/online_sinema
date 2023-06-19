@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 import backoff as backoff
@@ -7,11 +8,11 @@ import requests
 from notifications.email.src.models.transform import OrjsonModel
 
 
-class BaseEnricher:
+class BaseEnricher(ABC):
     def __init__(self, url: str, target_model: OrjsonModel) -> None:
         self.url = url
         self.target_model = target_model
-
+    @abstractmethod
     def get_data(self, id: str):
         pass
 
