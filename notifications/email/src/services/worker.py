@@ -39,14 +39,14 @@ class Worker:
         try:
             template = self.templater.get_template(event_type)
         except Exception:
-            logging.error('Ошибка получеения шаблона.')
+            logging.error('Mistake while getting temlate.')
             channel.basic_ack(method.delivery_tag)
             return
 
         try:
             user_data = self.enrichers['user'].get_data(user_id)
         except Exception:
-            logging.error('Ошибка сбора данных пользователя.')
+            logging.error('Mistake while getting users data.')
             channel.basic_ack(method.delivery_tag)
             return
 
@@ -64,12 +64,11 @@ class Worker:
                 subject=template.subject
             )
         except Exception as e:
-            logging.error('Ошибка при отправке письма: ', exc_info=e)
+            logging.error('Mistake while sending letter.', exc_info=e)
             channel.basic_ack(method.delivery_tag)
 
     def _get_context(self, event_type, message: Dict[str, Any]):
         if event_type == 'notification_about_new_film':
-            movie_info = self.enrichers['movie'].get_data(message['movie_id'])
-            return movie_info
+            return self.enrichers['movie'].get_data(message['movie_id'])
         else:
             raise EventNotImplementedError

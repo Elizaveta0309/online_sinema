@@ -50,6 +50,7 @@ class FakeMailer(BaseMailer):
 
         if msg.is_multipart():
             for part in msg.walk():
+
                 self._print_message(part)
         else:
             self._print_message(part)
@@ -59,3 +60,4 @@ class FakeMailer(BaseMailer):
         if content_type == "text/plain" or content_type == "text/html":
             body = msg.get_payload(decode=True).decode()
             print(body)
+
