@@ -49,11 +49,11 @@ class FakeMailer(BaseMailer):
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
-                if content_type == "text/plain" or content_type == "text/html":
+                if content_type in ["text/plain", "text/html"]:
                     body = part.get_payload(decode=True).decode()
                     print(body)
         else:
             content_type = msg.get_content_type()
-            if content_type == "text/plain" or content_type == "text/html":
+            if content_type in ["text/plain", "text/html"]:
                 body = msg.get_payload(decode=True).decode()
                 print(body)

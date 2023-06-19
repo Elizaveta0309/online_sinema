@@ -36,8 +36,7 @@ class PostgresStorage(MainStorage):
         with self.conn_context() as conn:
             with conn.cursor() as curs:
                 curs.execute(query, (datetime.now(),))
-                while row := curs.fetchone():
-                    yield row
+                yield curs.fetchmany()
 
     @backoff.on_exception(wait_gen=backoff.expo, exception=Exception)
     def update_event(
