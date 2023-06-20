@@ -1,6 +1,7 @@
 from fastapi import Query
 
-class NewFilmParams:
+
+class NewFilmParams(object):
     def __init__(
             self,
             transport: str = Query(
@@ -23,6 +24,5 @@ class NewFilmParams:
         self.transport = transport
         self.event_type = event_type
         self.template_id = template_id
-        self.users_id = user_id
-        self.films_id = film_id
-
+        self.user_id = user_id
+        self.film_id = film_id

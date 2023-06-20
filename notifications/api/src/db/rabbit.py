@@ -1,28 +1,21 @@
 import json
-import pika
 import datetime
-
+from functools import lru_cache
 
 
 class AsyncRabbitPublisher:
     def __init__(self):
-        self.credentials = pika.PlainCredentials('guest', 'guest')
-        self.parameters = pika.URLParameters('rabbitmq',
-                                       5672,
-                                       '/',
-                                       self.credentials)
-        self.connection = pika.BlockingConnection(self.parameters)
-        self.channel = None
-
         self.EXCHANGE = "email"
-
-
+        self.channel = None
 
     async def send(self, message):
         self.channel.basic_publish(self.EXCHANGE, str(datetime.datetime.now()),
-                                    json.dumps(message, ensure_ascii=False))
+                                   json.dumps(message, ensure_ascii=False))
 
 
+publisher = AsyncRabbitPublisher()
+
+
+@lru_cache()
 async def get_rabbit() -> AsyncRabbitPublisher:
-    return AsyncRabbitPublisher()
-
+    return publisher

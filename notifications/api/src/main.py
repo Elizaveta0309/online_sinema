@@ -1,19 +1,26 @@
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from pika import BlockingConnection, PlainCredentials, URLParameters
 
-from src.db.rabbit import get_rabbit
+from src.db.rabbit import publisher, AsyncRabbitPublisher
 from src.config import settings
 from contextlib import asynccontextmanager
 
 from notifications.api.src.api.v1 import notifications
 
-rabbit = get_rabbit()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    rabbit.channel = rabbit.connection.channel()
+    credentials = PlainCredentials('guest', 'guest')
+    parameters = URLParameters('rabbitmq',
+                               5672,
+                               '/',
+                               credentials)
+    rabbit_connect = BlockingConnection(parameters)
+    publisher.channel = rabbit_connect.channel()
     yield
-    rabbit.connection.close()
+    rabbit_connect.close()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,7 +30,6 @@ app = FastAPI(
     debug=True,
     lifespan=lifespan
 )
-
 
 app.include_router(
     notifications.router,
