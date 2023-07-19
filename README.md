@@ -1,5 +1,7 @@
+# Ссылка на дипломный проект:
+https://github.com/Adedal513/graduate_work/
+---
 ## Async API first sprint
-
 Проект реализует асинхронный REST API для кинотеатра.
 
 ### Используемые технологии
